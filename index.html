@@ -43,6 +43,8 @@
       <div class="row" style="margin-bottom: 10px;">
         <label class="muted">Tax %</label>
         <input type="number" id="taxPct" min="0" step="0.01" value="0" />
+        <label class="muted">Discount %</label>
+        <input type="number" id="discountPct" min="0" step="0.01" value="0" />
         <label class="muted">Title</label>
         <input id="receiptTitle" value="Receipt" style="min-width: 200px;" />
       </div>
@@ -88,10 +90,17 @@
   const $ = (id) => document.getElementById(id);
 
   const defaultItems = [
-    { id: crypto.randomUUID(), name: "Coffee", price: 3.50 },
-    { id: crypto.randomUUID(), name: "Tea", price: 3.00 },
-    { id: crypto.randomUUID(), name: "Sandwich", price: 8.00 },
-    { id: crypto.randomUUID(), name: "Cookie", price: 2.25 },
+    { id: crypto.randomUUID(), name: "Guku", price: 100 },
+    { id: crypto.randomUUID(), name: "Pad Thai", price: 200 },
+    { id: crypto.randomUUID(), name: "Cali Maki", price: 100 },
+    { id: crypto.randomUUID(), name: "Salad", price: 85 },
+    { id: crypto.randomUUID(), name: "Sashimi Roll", price: 125 },
+    { id: crypto.randomUUID(), name: "Tuna Roll", price: 145 },
+    { id: crypto.randomUUID(), name: "Chips", price: 150 },
+    { id: crypto.randomUUID(), name: "Pan Noodles", price: 100 },
+    { id: crypto.randomUUID(), name: "Matcha Tea", price: 80 },
+    { id: crypto.randomUUID(), name: "Sake", price: 100 },
+    { id: crypto.randomUUID(), name: "Sakura Latte", price: 50 },
   ];
 
   const load = (k, fallback) => {
@@ -105,9 +114,11 @@
   let items = load("sop_items_v1", defaultItems);
   let order = load("sop_order_v1", {}); // { itemId: qty }
   let taxPct = load("sop_tax_v1", 0);
+  let discountPct = load("sop_discount_v1", 0);
   let title = load("sop_title_v1", "Receipt");
 
   $("taxPct").value = taxPct;
+  $("discountPct").value = discountPct;
   $("receiptTitle").value = title;
 
   function money(n){ return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); }
@@ -131,6 +142,7 @@
     save("sop_items_v1", items);
     save("sop_order_v1", order);
     save("sop_tax_v1", Number($("taxPct").value || 0));
+    save("sop_discount_v1", Number($("discountPct").value || 0));
     save("sop_title_v1", $("receiptTitle").value || "Receipt");
     $("status").textContent = "Saved locally";
   }
@@ -146,13 +158,15 @@
       .filter(Boolean);
 
     const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
-    const tax = subtotal * (Number($("taxPct").value || 0) / 100);
-    const total = subtotal + tax;
-    return { lines, subtotal, tax, total };
+    const discount = subtotal * (Number($("discountPct").value || 0) / 100);
+    const afterDiscount = subtotal - discount;
+    const tax = afterDiscount * (Number($("taxPct").value || 0) / 100);
+    const total = afterDiscount + tax;
+    return { lines, subtotal, discount, afterDiscount, tax, total };
   }
 
   function receiptText(){
-    const { lines, subtotal, tax, total } = calc();
+    const { lines, subtotal, discount, afterDiscount, tax, total } = calc();
     const t = ($("receiptTitle").value || "Receipt").trim();
 
     const now = new Date();
@@ -170,8 +184,10 @@
       }
       body.push("");
       body.push(`Subtotal: $${money(subtotal)}`);
-      const pct = Number($("taxPct").value || 0);
-      if (pct > 0) body.push(`Tax (${money(pct)}%): $${money(tax)}`);
+      const discPct = Number($("discountPct").value || 0);
+      if (discPct > 0) body.push(`Discount (${money(discPct)}%): -$${money(discount)}`);
+      const taxPct = Number($("taxPct").value || 0);
+      if (taxPct > 0) body.push(`Tax (${money(taxPct)}%): $${money(tax)}`);
       body.push(`Total: $${money(total)}`);
     }
     return body.join("\n");
@@ -302,10 +318,13 @@
     wrap.innerHTML = "";
     wrap.appendChild(table);
 
-    const pct = Number($("taxPct").value || 0);
-    $("totalLine").textContent = pct > 0
-      ? `Subtotal $${money(subtotal)}  |  Tax $${money(tax)}  |  Total $${money(total)}`
-      : `Total $${money(total)}`;
+    const discPct = Number($("discountPct").value || 0);
+    const taxPct = Number($("taxPct").value || 0);
+    const parts = [`Subtotal $${money(subtotal)}`];
+    if (discPct > 0) parts.push(`Discount -$${money(discount)}`);
+    if (taxPct > 0) parts.push(`Tax $${money(tax)}`);
+    parts.push(`Total $${money(total)}`);
+    $("totalLine").textContent = parts.join("  |  ");
   }
 
   function renderReceipt(){
@@ -333,6 +352,7 @@
   };
 
   $("taxPct").oninput = () => { persist(); render(); };
+  $("discountPct").oninput = () => { persist(); render(); };
   $("receiptTitle").oninput = () => { persist(); render(); };
 
   $("clearOrderBtn").onclick = () => {
