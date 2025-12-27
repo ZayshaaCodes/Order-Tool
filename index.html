@@ -292,6 +292,11 @@
       itemTd.textContent = `${it.name} ($${money(it.price)})`;
 
       const qtyTd = document.createElement("td");
+      const minus10 = document.createElement("button");
+      minus10.className = "btn small";
+      minus10.textContent = "--";
+      minus10.onclick = () => setQty(id, (order[id] || 0) - 5);
+
       const minus = document.createElement("button");
       minus.className = "btn small";
       minus.textContent = "-";
@@ -308,7 +313,12 @@
       plus.textContent = "+";
       plus.onclick = () => setQty(id, (order[id] || 0) + 1);
 
-      qtyTd.append(minus, qtySpan, plus);
+      const plus10 = document.createElement("button");
+      plus10.className = "btn small";
+      plus10.textContent = "++";
+      plus10.onclick = () => setQty(id, (order[id] || 0) + 5);
+
+      qtyTd.append(minus10, minus, qtySpan, plus, plus10);
 
       const lineTd = document.createElement("td");
       lineTd.textContent = `$${money(it.price * qty)}`;
