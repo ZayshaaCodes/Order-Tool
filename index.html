@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Order Pad</title>
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+    body { margin: 16px; max-width: 980px; }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    .grid { display: grid; gap: 12px; grid-template-columns: 1.2fr 1fr; }
+    @media (max-width: 820px){ .grid{ grid-template-columns: 1fr; } }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 12px; }
+    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .row > * { flex: 0 0 auto; }
+    .btn { padding: 10px 12px; border: 1px solid #ccc; border-radius: 10px; background: #f7f7f7; cursor: pointer; }
+    .btn:active { transform: scale(0.99); }
+    .btn.primary { background: #e9f5ff; border-color: #b9dcff; }
+    .btn.danger { background: #ffecec; border-color: #ffb9b9; }
+    .btn.small { padding: 6px 10px; border-radius: 8px; }
+    input, textarea { border: 1px solid #ccc; border-radius: 10px; padding: 10px; }
+    input[type="number"] { width: 110px; }
+    textarea { width: 100%; min-height: 220px; resize: vertical; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
+    th { font-size: 12px; color: #555; }
+    .muted { color: #666; font-size: 12px; }
+    .pill { border: 1px solid #ddd; padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+    .spacer { flex: 1 1 auto; }
+  </style>
+</head>
+<body>
+  <h1>Simple Order Pad</h1>
+
+  <div class="grid">
+    <div class="card">
+      <div class="row" style="margin-bottom: 10px;">
+        <span class="pill" id="status">Saved locally</span>
+        <span class="spacer"></span>
+        <button class="btn danger" id="clearOrderBtn">Clear order</button>
+      </div>
+
+      <div class="row" style="margin-bottom: 10px;">
+        <label class="muted">Tax %</label>
+        <input type="number" id="taxPct" min="0" step="0.01" value="0" />
+        <label class="muted">Title</label>
+        <input id="receiptTitle" value="Receipt" style="min-width: 200px;" />
+      </div>
+
+      <h2 style="font-size: 14px; margin: 12px 0 8px;">Items (tap to add)</h2>
+      <div class="row" id="itemButtons"></div>
+
+      <details style="margin-top: 12px;">
+        <summary style="cursor:pointer;">Edit items & prices</summary>
+        <div style="margin-top: 10px;">
+          <div class="row" style="margin-bottom: 10px;">
+            <input id="newName" placeholder="Item name" style="min-width: 180px;" />
+            <input id="newPrice" type="number" placeholder="Price" step="0.01" />
+            <button class="btn primary" id="addItemBtn">Add item</button>
+          </div>
+          <div id="itemsEditor"></div>
+          <div class="muted" style="margin-top: 6px;">
+            Tip: prices and items are stored in your browser on this device.
+          </div>
+        </div>
+      </details>
+
+      <h2 style="font-size: 14px; margin: 14px 0 8px;">Current order</h2>
+      <div id="orderTableWrap"></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="margin-bottom: 10px;">
+        <button class="btn primary" id="copyBtn">Copy receipt</button>
+        <button class="btn" id="selectBtn">Select all</button>
+        <span class="spacer"></span>
+        <span class="muted" id="totalLine"></span>
+      </div>
+      <textarea id="receiptOut" spellcheck="false"></textarea>
+      <div class="muted" style="margin-top: 8px;">
+        Output is plain text for easy paste into messages.
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  const defaultItems = [
+    { id: crypto.randomUUID(), name: "Coffee", price: 3.50 },
+    { id: crypto.randomUUID(), name: "Tea", price: 3.00 },
+    { id: crypto.randomUUID(), name: "Sandwich", price: 8.00 },
+    { id: crypto.randomUUID(), name: "Cookie", price: 2.25 },
+  ];
+
+  const load = (k, fallback) => {
+    try {
+      const v = localStorage.getItem(k);
+      return v ? JSON.parse(v) : fallback;
+    } catch { return fallback; }
+  };
+  const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+  let items = load("sop_items_v1", defaultItems);
+  let order = load("sop_order_v1", {}); // { itemId: qty }
+  let taxPct = load("sop_tax_v1", 0);
+  let title = load("sop_title_v1", "Receipt");
+
+  $("taxPct").value = taxPct;
+  $("receiptTitle").value = title;
+
+  function money(n){ return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); }
+
+  function getItem(id){ return items.find(i => i.id === id); }
+
+  function addToOrder(id){
+    order[id] = (order[id] || 0) + 1;
+    persist();
+    render();
+  }
+
+  function setQty(id, qty){
+    if (qty <= 0) delete order[id];
+    else order[id] = qty;
+    persist();
+    render();
+  }
+
+  function persist(){
+    save("sop_items_v1", items);
+    save("sop_order_v1", order);
+    save("sop_tax_v1", Number($("taxPct").value || 0));
+    save("sop_title_v1", $("receiptTitle").value || "Receipt");
+    $("status").textContent = "Saved locally";
+  }
+
+  function calc(){
+    const lines = Object.entries(order)
+      .map(([id, qty]) => {
+        const it = getItem(id);
+        if (!it) return null;
+        const lineTotal = it.price * qty;
+        return { name: it.name, price: it.price, qty, lineTotal };
+      })
+      .filter(Boolean);
+
+    const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
+    const tax = subtotal * (Number($("taxPct").value || 0) / 100);
+    const total = subtotal + tax;
+    return { lines, subtotal, tax, total };
+  }
+
+  function receiptText(){
+    const { lines, subtotal, tax, total } = calc();
+    const t = ($("receiptTitle").value || "Receipt").trim();
+
+    const now = new Date();
+    const stamp = now.toLocaleString();
+
+    const body = [];
+    body.push(t);
+    body.push(stamp);
+    body.push("");
+    if (!lines.length){
+      body.push("(no items)");
+    } else {
+      for (const l of lines){
+        body.push(`${l.qty} x ${l.name} @ $${money(l.price)} = $${money(l.lineTotal)}`);
+      }
+      body.push("");
+      body.push(`Subtotal: $${money(subtotal)}`);
+      const pct = Number($("taxPct").value || 0);
+      if (pct > 0) body.push(`Tax (${money(pct)}%): $${money(tax)}`);
+      body.push(`Total: $${money(total)}`);
+    }
+    return body.join("\n");
+  }
+
+  function renderButtons(){
+    const wrap = $("itemButtons");
+    wrap.innerHTML = "";
+    items.forEach(it => {
+      const b = document.createElement("button");
+      b.className = "btn";
+      b.textContent = `${it.name} ($${money(it.price)})`;
+      b.onclick = () => addToOrder(it.id);
+      wrap.appendChild(b);
+    });
+  }
+
+  function renderEditor(){
+    const wrap = $("itemsEditor");
+    wrap.innerHTML = "";
+
+    const table = document.createElement("table");
+    table.innerHTML = `
+      <thead><tr><th>Name</th><th>Price</th><th></th></tr></thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector("tbody");
+
+    items.forEach(it => {
+      const tr = document.createElement("tr");
+
+      const nameTd = document.createElement("td");
+      const nameIn = document.createElement("input");
+      nameIn.value = it.name;
+      nameIn.oninput = () => { it.name = nameIn.value; persist(); render(); };
+      nameTd.appendChild(nameIn);
+
+      const priceTd = document.createElement("td");
+      const priceIn = document.createElement("input");
+      priceIn.type = "number";
+      priceIn.step = "0.01";
+      priceIn.value = it.price;
+      priceIn.oninput = () => {
+        it.price = Number(priceIn.value || 0);
+        persist(); render();
+      };
+      priceTd.appendChild(priceIn);
+
+      const delTd = document.createElement("td");
+      const delBtn = document.createElement("button");
+      delBtn.className = "btn small danger";
+      delBtn.textContent = "Delete";
+      delBtn.onclick = () => {
+        items = items.filter(x => x.id !== it.id);
+        delete order[it.id];
+        persist(); render();
+      };
+      delTd.appendChild(delBtn);
+
+      tr.appendChild(nameTd);
+      tr.appendChild(priceTd);
+      tr.appendChild(delTd);
+      tbody.appendChild(tr);
+    });
+
+    wrap.appendChild(table);
+  }
+
+  function renderOrder(){
+    const wrap = $("orderTableWrap");
+    const { lines, subtotal, tax, total } = calc();
+
+    if (!lines.length){
+      wrap.innerHTML = `<div class="muted">No items yet. Tap buttons above to add.</div>`;
+      $("totalLine").textContent = "";
+      return;
+    }
+
+    const table = document.createElement("table");
+    table.innerHTML = `
+      <thead><tr><th>Item</th><th>Qty</th><th>Line</th><th></th></tr></thead>
+      <tbody></tbody>
+    `;
+    const tbody = table.querySelector("tbody");
+
+    for (const [id, qty] of Object.entries(order)){
+      const it = getItem(id);
+      if (!it) continue;
+
+      const tr = document.createElement("tr");
+
+      const itemTd = document.createElement("td");
+      itemTd.textContent = `${it.name} ($${money(it.price)})`;
+
+      const qtyTd = document.createElement("td");
+      const minus = document.createElement("button");
+      minus.className = "btn small";
+      minus.textContent = "-";
+      minus.onclick = () => setQty(id, (order[id] || 0) - 1);
+
+      const qtySpan = document.createElement("span");
+      qtySpan.style.minWidth = "28px";
+      qtySpan.style.display = "inline-block";
+      qtySpan.style.textAlign = "center";
+      qtySpan.textContent = qty;
+
+      const plus = document.createElement("button");
+      plus.className = "btn small";
+      plus.textContent = "+";
+      plus.onclick = () => setQty(id, (order[id] || 0) + 1);
+
+      qtyTd.append(minus, qtySpan, plus);
+
+      const lineTd = document.createElement("td");
+      lineTd.textContent = `$${money(it.price * qty)}`;
+
+      const rmTd = document.createElement("td");
+      const rmBtn = document.createElement("button");
+      rmBtn.className = "btn small danger";
+      rmBtn.textContent = "Remove";
+      rmBtn.onclick = () => setQty(id, 0);
+      rmTd.appendChild(rmBtn);
+
+      tr.append(itemTd, qtyTd, lineTd, rmTd);
+      tbody.appendChild(tr);
+    }
+
+    wrap.innerHTML = "";
+    wrap.appendChild(table);
+
+    const pct = Number($("taxPct").value || 0);
+    $("totalLine").textContent = pct > 0
+      ? `Subtotal $${money(subtotal)}  |  Tax $${money(tax)}  |  Total $${money(total)}`
+      : `Total $${money(total)}`;
+  }
+
+  function renderReceipt(){
+    $("receiptOut").value = receiptText();
+  }
+
+  function render(){
+    renderButtons();
+    renderEditor();
+    renderOrder();
+    renderReceipt();
+  }
+
+  // Events
+  $("addItemBtn").onclick = () => {
+    const name = ($("newName").value || "").trim();
+    const price = Number($("newPrice").value || 0);
+    if (!name) return;
+
+    items.push({ id: crypto.randomUUID(), name, price });
+    $("newName").value = "";
+    $("newPrice").value = "";
+    persist();
+    render();
+  };
+
+  $("taxPct").oninput = () => { persist(); render(); };
+  $("receiptTitle").oninput = () => { persist(); render(); };
+
+  $("clearOrderBtn").onclick = () => {
+    order = {};
+    persist();
+    render();
+  };
+
+  $("copyBtn").onclick = async () => {
+    const text = $("receiptOut").value;
+    try {
+      await navigator.clipboard.writeText(text);
+      $("status").textContent = "Copied!";
+      setTimeout(() => $("status").textContent = "Saved locally", 900);
+    } catch {
+      $("status").textContent = "Copy failed (select + ctrl/cmd+c)";
+    }
+  };
+
+  $("selectBtn").onclick = () => {
+    $("receiptOut").focus();
+    $("receiptOut").select();
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>
