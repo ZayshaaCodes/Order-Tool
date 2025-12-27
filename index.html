@@ -316,7 +316,10 @@
       const plus10 = document.createElement("button");
       plus10.className = "btn small";
       plus10.textContent = "++";
-      plus10.onclick = () => setQty(id, (order[id] || 0) + 5);
+      plus10.onclick = () => {
+        const current = order[id] || 0;
+        setQty(id, current < 5 ? 5 : current + 5);
+      };
 
       qtyTd.append(minus10, minus, qtySpan, plus, plus10);
 
