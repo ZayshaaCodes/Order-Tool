@@ -61,6 +61,8 @@
             <input id="newName" placeholder="Item name" style="min-width: 180px;" />
             <input id="newPrice" type="number" placeholder="Price" step="0.01" />
             <button class="btn primary" id="addItemBtn">Add item</button>
+            <span class="spacer"></span>
+            <button class="btn danger" id="resetDefaultBtn">Reset to defaults</button>
           </div>
           <div id="itemsEditor"></div>
           <div class="muted" style="margin-top: 6px;">
@@ -92,17 +94,22 @@
   const $ = (id) => document.getElementById(id);
 
   const defaultItems = [
-    { id: crypto.randomUUID(), name: "Guku", price: 100 },
-    { id: crypto.randomUUID(), name: "Pad Thai", price: 200 },
-    { id: crypto.randomUUID(), name: "Cali Maki", price: 100 },
-    { id: crypto.randomUUID(), name: "Salad", price: 85 },
-    { id: crypto.randomUUID(), name: "Sashimi Roll", price: 125 },
-    { id: crypto.randomUUID(), name: "Tuna Roll", price: 145 },
-    { id: crypto.randomUUID(), name: "Chips", price: 150 },
-    { id: crypto.randomUUID(), name: "Pan Noodles", price: 100 },
-    { id: crypto.randomUUID(), name: "Matcha Tea", price: 80 },
-    { id: crypto.randomUUID(), name: "Sake", price: 100 },
+    { id: crypto.randomUUID(), name: "Guku", price: 50 },
+    { id: crypto.randomUUID(), name: "Pad Thai", price: 100 },
+    { id: crypto.randomUUID(), name: "Cali Maki", price: 50 },
+    { id: crypto.randomUUID(), name: "Salad", price: 42 },
+    { id: crypto.randomUUID(), name: "Sashimi Roll", price: 63 },
+    { id: crypto.randomUUID(), name: "Tuna Roll", price: 72 },
+    { id: crypto.randomUUID(), name: "Chips", price: 75 },
+    { id: crypto.randomUUID(), name: "Pan Noodles", price: 50 },
+    { id: crypto.randomUUID(), name: "Matcha Tea", price: 40 },
+    { id: crypto.randomUUID(), name: "Sake", price: 50 },
     { id: crypto.randomUUID(), name: "Sakura Latte", price: 50 },
+    { id: crypto.randomUUID(), name: "Whiskey", price: 30 },
+    { id: crypto.randomUUID(), name: "Tequila", price: 30 },
+    { id: crypto.randomUUID(), name: "Rum", price: 40 },
+    { id: crypto.randomUUID(), name: "Vodka", price: 30 },
+    { id: crypto.randomUUID(), name: "Wine", price: 150 },
   ];
 
   const load = (k, fallback) => {
@@ -361,6 +368,15 @@
     order = {};
     persist();
     render();
+  };
+
+  $("resetDefaultBtn").onclick = () => {
+    if (confirm("Reset all items to default list? This will remove custom items.")) {
+      items = defaultItems.map(it => ({ ...it, id: crypto.randomUUID() }));
+      order = {};
+      persist();
+      render();
+    }
   };
 
   $("copyBtn").onclick = async () => {
