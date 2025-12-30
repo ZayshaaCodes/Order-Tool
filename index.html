@@ -416,6 +416,14 @@
 
   // Menu save/load functionality
   $("saveMenuBtn").onclick = () => {
+    const defaultFilename = `menu-${new Date().toISOString().slice(0, 10)}`;
+    const filename = prompt("Enter filename for menu:", defaultFilename);
+    
+    if (!filename) return; // User cancelled
+    
+    // Ensure .json extension
+    const finalFilename = filename.endsWith('.json') ? filename : filename + '.json';
+    
     const menuData = {
       items: items.map(item => ({ name: item.name, price: item.price })),
       exportDate: new Date().toISOString(),
@@ -428,7 +436,7 @@
     
     const link = document.createElement('a');
     link.href = url;
-    link.download = `menu-${new Date().toISOString().slice(0, 10)}.json`;
+    link.download = finalFilename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
