@@ -64,6 +64,12 @@
             <span class="spacer"></span>
             <button class="btn danger" id="resetDefaultBtn">Reset to defaults</button>
           </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <button class="btn" id="saveMenuBtn">Save menu</button>
+            <button class="btn" id="loadMenuBtn">Load menu</button>
+            <input type="file" id="menuFileInput" accept=".json" style="display: none;" />
+            <span class="spacer"></span>
+          </div>
           <div id="itemsEditor"></div>
           <div class="muted" style="margin-top: 6px;">
             Tip: prices and items are stored in your browser on this device.
@@ -406,6 +412,79 @@
   $("selectBtn").onclick = () => {
     $("receiptOut").focus();
     $("receiptOut").select();
+  };
+
+  // Menu save/load functionality
+  $("saveMenuBtn").onclick = () => {
+    const menuData = {
+      items: items.map(item => ({ name: item.name, price: item.price })),
+      exportDate: new Date().toISOString(),
+      version: "1.0"
+    };
+    
+    const dataStr = JSON.stringify(menuData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `menu-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    $("status").textContent = "Menu saved!";
+    setTimeout(() => $("status").textContent = "Saved locally", 1500);
+  };
+
+  $("loadMenuBtn").onclick = () => {
+    $("menuFileInput").click();
+  };
+
+  $("menuFileInput").onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const menuData = JSON.parse(event.target.result);
+        
+        if (!menuData.items || !Array.isArray(menuData.items)) {
+          throw new Error("Invalid menu format");
+        }
+        
+        const confirmed = confirm(
+          `Load menu with ${menuData.items.length} items?\n` +
+          (menuData.exportDate ? `Exported: ${new Date(menuData.exportDate).toLocaleString()}\n` : "") +
+          "This will replace your current menu items."
+        );
+        
+        if (confirmed) {
+          items = menuData.items.map(item => ({
+            id: crypto.randomUUID(),
+            name: item.name || "Unnamed Item",
+            price: Number(item.price) || 0
+          }));
+          
+          // Clear current order since items changed
+          order = {};
+          
+          persist();
+          render();
+          
+          $("status").textContent = "Menu loaded!";
+          setTimeout(() => $("status").textContent = "Saved locally", 1500);
+        }
+      } catch (error) {
+        alert("Error loading menu file: " + error.message);
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset file input
+    e.target.value = "";
   };
 
   render();
