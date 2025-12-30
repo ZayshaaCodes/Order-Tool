@@ -373,7 +373,7 @@
       colorIn.type = "color";
       colorIn.className = "color-picker";
       colorIn.value = it.color || "#6b7280";
-      colorIn.oninput = () => {
+      colorIn.onchange = () => {
         it.color = colorIn.value;
         persist(); render();
       };
