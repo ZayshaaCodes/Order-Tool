@@ -6,27 +6,73 @@
   <title>Order Pad</title>
   <style>
     :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    body { margin: 16px; max-width: 980px; }
-    h1 { font-size: 20px; margin: 0 0 12px; }
+    body { 
+      margin: 16px; 
+      max-width: 1200px; 
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+    h1 { font-size: 20px; margin: 0 0 12px; color: #ffffff; }
     .grid { display: grid; gap: 12px; grid-template-columns: 1.2fr 1fr; }
-    @media (max-width: 820px){ .grid{ grid-template-columns: 1fr; } }
-    .card { border: 1px solid #ddd; border-radius: 10px; padding: 12px; }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+    .card { 
+      border: 1px solid #333; 
+      border-radius: 5px; 
+      padding: 12px; 
+      background-color: #2d2d2d;
+    }
     .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .row > * { flex: 0 0 auto; }
-    .btn { padding: 10px 12px; border: 1px solid #ccc; border-radius: 10px; background: #f7f7f7; cursor: pointer; }
+    .btn { 
+      padding: 10px 12px; 
+      border: 1px solid #444; 
+      border-radius: 10px; 
+      background: #3a3a3a; 
+      color: #e0e0e0;
+      cursor: pointer; 
+    }
+    .btn:hover { background: #4a4a4a; }
     .btn:active { transform: scale(0.99); }
-    .btn.primary { background: #e9f5ff; border-color: #b9dcff; }
-    .btn.danger { background: #ffecec; border-color: #ffb9b9; }
+    .btn.primary { background: #1e3a5f; border-color: #2563eb; color: #93c5fd; }
+    .btn.primary:hover { background: #2563eb; color: #ffffff; }
+    .btn.danger { background: #5f1e1e; border-color: #dc2626; color: #fca5a5; }
+    .btn.danger:hover { background: #dc2626; color: #ffffff; }
     .btn.small { padding: 6px 10px; border-radius: 8px; }
-    input, textarea { border: 1px solid #ccc; border-radius: 10px; padding: 10px; }
+    input, textarea, select { 
+      border: 1px solid #444; 
+      border-radius: 10px; 
+      padding: 10px; 
+      background-color: #3a3a3a;
+      color: #e0e0e0;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: #2563eb;
+      outline: none;
+    }
     input[type="number"] { width: 110px; }
     textarea { width: 100%; min-height: 220px; resize: vertical; }
     table { width: 100%; border-collapse: collapse; }
-    th, td { border-bottom: 1px solid #eee; padding: 8px; text-align: left; }
-    th { font-size: 12px; color: #555; }
-    .muted { color: #666; font-size: 12px; }
-    .pill { border: 1px solid #ddd; padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+    th, td { border-bottom: 1px solid #444; padding: 8px; text-align: left; }
+    th { font-size: 12px; color: #a0a0a0; }
+    .muted { color: #888; font-size: 12px; }
+    .pill { 
+      border: 1px solid #444; 
+      padding: 6px 10px; 
+      border-radius: 999px; 
+      font-size: 12px;
+      background-color: #3a3a3a;
+    }
     .spacer { flex: 1 1 auto; }
+    
+    /* Color picker styles */
+    .color-picker {
+      width: 40px;
+      height: 30px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      cursor: pointer;
+      padding: 0;
+    }
   </style>
 </head>
 <body>
@@ -41,8 +87,6 @@
       </div>
 
       <div class="row" style="margin-bottom: 10px;">
-        <label class="muted">Tax %</label>
-        <input type="number" id="taxPct" min="0" step="0.01" value="0" />
         <label class="muted">Discount %</label>
         <input type="number" id="discountPct" min="0" step="0.01" value="0" />
       </div>
@@ -60,6 +104,7 @@
           <div class="row" style="margin-bottom: 10px;">
             <input id="newName" placeholder="Item name" style="min-width: 180px;" />
             <input id="newPrice" type="number" placeholder="Price" step="0.01" />
+            <input id="newColor" type="color" value="#6b7280" class="color-picker" title="Item color" />
             <button class="btn primary" id="addItemBtn">Add item</button>
             <span class="spacer"></span>
             <button class="btn danger" id="resetDefaultBtn">Reset to defaults</button>
@@ -68,6 +113,13 @@
             <button class="btn" id="saveMenuBtn">Save menu</button>
             <button class="btn" id="loadMenuBtn">Load menu</button>
             <input type="file" id="menuFileInput" accept=".json" style="display: none;" />
+            <span class="spacer"></span>
+          </div>
+          <div class="row" style="margin-bottom: 10px;">
+            <label class="muted">Template:</label>
+            <select id="templateSelect" style="border: 1px solid #ccc; border-radius: 10px; padding: 8px; min-width: 160px;">
+            </select>
+            <button class="btn" id="loadTemplateBtn">Load template</button>
             <span class="spacer"></span>
           </div>
           <div id="itemsEditor"></div>
@@ -99,24 +151,74 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  const defaultItems = [
-    { id: crypto.randomUUID(), name: "Guku", price: 100 },
-    { id: crypto.randomUUID(), name: "Pad Thai", price: 200 },
-    { id: crypto.randomUUID(), name: "Cali Maki", price: 100 },
-    { id: crypto.randomUUID(), name: "Salad", price: 80 },
-    { id: crypto.randomUUID(), name: "Sashimi Roll", price: 120 },
-    { id: crypto.randomUUID(), name: "Tuna Roll", price: 150 },
-    { id: crypto.randomUUID(), name: "Chips", price: 100 },
-    { id: crypto.randomUUID(), name: "Pan Noodles", price: 100 },
-    { id: crypto.randomUUID(), name: "Matcha Tea", price: 80 },
-    { id: crypto.randomUUID(), name: "Sake", price: 100 },
-    { id: crypto.randomUUID(), name: "Sakura Latte", price: 50 },
-    // { id: crypto.randomUUID(), name: "Whiskey", price: 30 },
-    // { id: crypto.randomUUID(), name: "Tequila", price: 30 },
-    // { id: crypto.randomUUID(), name: "Rum", price: 40 },
-    // { id: crypto.randomUUID(), name: "Vodka", price: 30 },
-    // { id: crypto.randomUUID(), name: "Wine", price: 150 },
-  ];
+  const menuTemplates = {
+    "KOI": [
+      { name: "Guku", price: 100, color: "#16a34a" },         
+      { name: "Pad Thai", price: 200, color: "#16a34a" },     
+      { name: "Cali Maki", price: 100, color: "#16a34a" },    
+      { name: "Salad", price: 80, color: "#16a34a" },         
+      { name: "Sashimi Roll", price: 120, color: "#16a34a" }, 
+      { name: "Tuna Roll", price: 150, color: "#16a34a" },    
+      { name: "Pan Noodles", price: 100, color: "#16a34a" },  
+      { name: "Matcha Tea", price: 80, color: "#2563eb" },    
+      { name: "Sake", price: 100, color: "#2563eb" },         
+      { name: "Sakura Latte", price: 50, color: "#2563eb" }   
+    ],
+    // "Pizza This": [
+    //   { name: "Margherita Pizza", price: 150, color: "#dc2626" },    // Food - Red
+    //   { name: "Pepperoni Pizza", price: 125, color: "#dc2626" },     // Food - Red
+    //   { name: "Supreme Pizza", price: 100, color: "#dc2626" },       // Food - Red
+    //   { name: "Garlic Bread", price: 70, color: "#ea580c" },         // Food (side) - Orange
+    //   { name: "Caesar Salad", price: 85, color: "#16a34a" },         // Food (healthy) - Green
+    //   { name: "Wings (6pc)", price: 95, color: "#ea580c" },          // Food (side) - Orange
+    //   { name: "Soda", price: 30, color: "#2563eb" },                 // Drink - Blue
+    //   { name: "Beer", price: 20, color: "#2563eb" }                  // Drink - Blue
+    // ],
+    // "Food Truck": [
+    //   { name: "Burger", price: 12, color: "#dc2626" },         // Food - Red
+    //   { name: "Cheeseburger", price: 13, color: "#dc2626" },   // Food - Red
+    //   { name: "Chicken Sandwich", price: 11, color: "#dc2626" }, // Food - Red
+    //   { name: "Hot Dog", price: 8, color: "#dc2626" },         // Food - Red
+    //   { name: "Fries", price: 4, color: "#ea580c" },           // Food (side) - Orange
+    //   { name: "Onion Rings", price: 5, color: "#ea580c" },     // Food (side) - Orange
+    //   { name: "Milkshake", price: 6, color: "#8b5cf6" },       // Drink (special) - Purple
+    //   { name: "Soda", price: 2, color: "#2563eb" },            // Drink - Blue
+    //   { name: "Water", price: 1, color: "#06b6d4" }            // Drink (basic) - Cyan
+    // ],
+    // "French Bakery": [
+    //   { name: "Sourdough Bread", price: 6, color: "#92400e" },        // Food (baked) - Brown
+    //   { name: "Croissant", price: 3, color: "#92400e" },              // Food (baked) - Brown
+    //   { name: "Chocolate Chip Cookies", price: 2, color: "#92400e" }, // Food (baked) - Brown
+    //   { name: "Apple Pie Slice", price: 4, color: "#dc2626" },        // Food (dessert) - Red
+    //   { name: "Cheesecake Slice", price: 5, color: "#dc2626" },       // Food (dessert) - Red
+    //   { name: "Cinnamon Roll", price: 3, color: "#92400e" },          // Food (baked) - Brown
+    //   { name: "Scone", price: 3, color: "#92400e" },                  // Food (baked) - Brown
+    //   { name: "Muffin", price: 2, color: "#92400e" },                 // Food (baked) - Brown
+    //   { name: "Coffee", price: 2, color: "#f59e0b" },                 // Energy drink - Amber
+    //   { name: "Espresso", price: 3, color: "#f59e0b" },               // Energy drink - Amber
+    //   { name: "Tea", price: 2, color: "#06b6d4" }                     // Drink - Cyan
+    // ],
+    // "Coffee Shop": [
+    //   { name: "Espresso", price: 3.50, color: "#f59e0b" },            // Energy drink - Amber
+    //   { name: "Cappuccino", price: 4.25, color: "#f59e0b" },          // Energy drink - Amber
+    //   { name: "Latte", price: 4.75, color: "#f59e0b" },               // Energy drink - Amber
+    //   { name: "Americano", price: 3.25, color: "#f59e0b" },           // Energy drink - Amber
+    //   { name: "Mocha", price: 5.25, color: "#8b5cf6" },               // Energy drink (special) - Purple
+    //   { name: "Iced Coffee", price: 3.75, color: "#06b6d4" },         // Energy drink (cold) - Cyan
+    //   { name: "Croissant", price: 3.00, color: "#92400e" },           // Food (baked) - Brown
+    //   { name: "Muffin", price: 2.75, color: "#92400e" },              // Food (baked) - Brown
+    //   { name: "Bagel", price: 2.50, color: "#92400e" },               // Food (baked) - Brown
+    //   { name: "Danish", price: 3.25, color: "#92400e" },              // Food (baked) - Brown
+    //   { name: "Smoothie", price: 5.50, color: "#16a34a" },            // Drink (healthy) - Green
+    //   { name: "Juice", price: 3.00, color: "#2563eb" }                // Drink - Blue
+    // ]
+  };
+
+  const defaultItems = menuTemplates["KOI"].map(item => ({
+    ...item,
+    id: crypto.randomUUID(),
+    color: item.color || "#6b7280"
+  }));
 
   const load = (k, fallback) => {
     try {
@@ -128,13 +230,30 @@
 
   let items = load("sop_items_v1", defaultItems);
   let order = load("sop_order_v1", {}); // { itemId: qty }
-  let taxPct = load("sop_tax_v1", 0);
   let discountPct = load("sop_discount_v1", 0);
   let title = load("sop_title_v1", "Receipt");
 
-  $("taxPct").value = taxPct;
   $("discountPct").value = discountPct;
   $("receiptTitle").value = title;
+
+  populateTemplateDropdown();
+
+  function populateTemplateDropdown() {
+    const select = $("templateSelect");
+    select.innerHTML = "";
+    
+    Object.keys(menuTemplates).forEach(templateName => {
+      const option = document.createElement("option");
+      option.value = templateName;
+      option.textContent = templateName;
+      select.appendChild(option);
+    });
+    
+    // Set default to first template
+    if (select.options.length > 0) {
+      select.value = Object.keys(menuTemplates)[0];
+    }
+  }
 
   function money(n){ return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); }
 
@@ -156,7 +275,6 @@
   function persist(){
     save("sop_items_v1", items);
     save("sop_order_v1", order);
-    save("sop_tax_v1", Number($("taxPct").value || 0));
     save("sop_discount_v1", Number($("discountPct").value || 0));
     save("sop_title_v1", $("receiptTitle").value || "Receipt");
     $("status").textContent = "Saved locally";
@@ -174,14 +292,12 @@
 
     const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
     const discount = subtotal * (Number($("discountPct").value || 0) / 100);
-    const afterDiscount = subtotal - discount;
-    const tax = afterDiscount * (Number($("taxPct").value || 0) / 100);
-    const total = afterDiscount + tax;
-    return { lines, subtotal, discount, afterDiscount, tax, total };
+    const total = subtotal - discount;
+    return { lines, subtotal, discount, total };
   }
 
   function receiptText(){
-    const { lines, subtotal, discount, afterDiscount, tax, total } = calc();
+    const { lines, subtotal, discount, total } = calc();
     const t = ($("receiptTitle").value || "Receipt").trim();
 
     const now = new Date();
@@ -201,8 +317,6 @@
       body.push(`Subtotal: $${money(subtotal)}`);
       const discPct = Number($("discountPct").value || 0);
       if (discPct > 0) body.push(`Discount (${money(discPct)}%): -$${money(discount)}`);
-      const taxPct = Number($("taxPct").value || 0);
-      if (taxPct > 0) body.push(`Tax (${money(taxPct)}%): $${money(tax)}`);
       body.push(`Total: $${money(total)}`);
     }
     return body.join("\n");
@@ -215,6 +329,9 @@
       const b = document.createElement("button");
       b.className = "btn";
       b.textContent = `${it.name} ($${money(it.price)})`;
+      b.style.backgroundColor = it.color || "#6b7280";
+      b.style.borderColor = it.color || "#6b7280";
+      b.style.color = "#ffffff";
       b.onclick = () => addToOrder(it.id);
       wrap.appendChild(b);
     });
@@ -226,7 +343,7 @@
 
     const table = document.createElement("table");
     table.innerHTML = `
-      <thead><tr><th>Name</th><th>Price</th><th></th></tr></thead>
+      <thead><tr><th>Name</th><th>Price</th><th>Color</th><th></th></tr></thead>
       <tbody></tbody>
     `;
     const tbody = table.querySelector("tbody");
@@ -251,6 +368,17 @@
       };
       priceTd.appendChild(priceIn);
 
+      const colorTd = document.createElement("td");
+      const colorIn = document.createElement("input");
+      colorIn.type = "color";
+      colorIn.className = "color-picker";
+      colorIn.value = it.color || "#6b7280";
+      colorIn.oninput = () => {
+        it.color = colorIn.value;
+        persist(); render();
+      };
+      colorTd.appendChild(colorIn);
+
       const delTd = document.createElement("td");
       const delBtn = document.createElement("button");
       delBtn.className = "btn small danger";
@@ -264,6 +392,7 @@
 
       tr.appendChild(nameTd);
       tr.appendChild(priceTd);
+      tr.appendChild(colorTd);
       tr.appendChild(delTd);
       tbody.appendChild(tr);
     });
@@ -273,7 +402,7 @@
 
   function renderOrder(){
     const wrap = $("orderTableWrap");
-    const { lines, subtotal, discount, tax, total } = calc();
+    const { lines, subtotal, discount, total } = calc();
 
     if (!lines.length){
       wrap.innerHTML = `<div class="muted">No items yet. Tap buttons above to add.</div>`;
@@ -347,10 +476,8 @@
     wrap.appendChild(table);
 
     const discPct = Number($("discountPct").value || 0);
-    const taxPct = Number($("taxPct").value || 0);
     const parts = [`Subtotal $${money(subtotal)}`];
     if (discPct > 0) parts.push(`Discount -$${money(discount)}`);
-    if (taxPct > 0) parts.push(`Tax $${money(tax)}`);
     parts.push(`Total $${money(total)}`);
     $("totalLine").textContent = parts.join("  |  ");
   }
@@ -370,16 +497,17 @@
   $("addItemBtn").onclick = () => {
     const name = ($("newName").value || "").trim();
     const price = Number($("newPrice").value || 0);
+    const color = $("newColor").value || "#6b7280";
     if (!name) return;
 
-    items.push({ id: crypto.randomUUID(), name, price });
+    items.push({ id: crypto.randomUUID(), name, price, color });
     $("newName").value = "";
     $("newPrice").value = "";
+    $("newColor").value = "#6b7280";
     persist();
     render();
   };
 
-  $("taxPct").oninput = () => { persist(); render(); };
   $("discountPct").oninput = () => { persist(); render(); };
   $("receiptTitle").oninput = () => { persist(); render(); };
 
@@ -390,11 +518,32 @@
   };
 
   $("resetDefaultBtn").onclick = () => {
-    if (confirm("Reset all items to default list? This will remove custom items.")) {
-      items = defaultItems.map(it => ({ ...it, id: crypto.randomUUID() }));
+    const selectedTemplate = $("templateSelect").value;
+    if (confirm(`Reset all items to ${selectedTemplate} template? This will remove custom items.`)) {
+      items = menuTemplates[selectedTemplate].map(it => ({ 
+        ...it, 
+        id: crypto.randomUUID(),
+        color: it.color || "#6b7280"
+      }));
       order = {};
       persist();
       render();
+    }
+  };
+
+  $("loadTemplateBtn").onclick = () => {
+    const selectedTemplate = $("templateSelect").value;
+    if (confirm(`Load ${selectedTemplate} template? This will replace your current menu items.`)) {
+      items = menuTemplates[selectedTemplate].map(it => ({ 
+        ...it, 
+        id: crypto.randomUUID(),
+        color: it.color || "#6b7280"
+      }));
+      order = {};
+      persist();
+      render();
+      $("status").textContent = "Template loaded!";
+      setTimeout(() => $("status").textContent = "Saved locally", 1500);
     }
   };
 
