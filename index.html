@@ -4,648 +4,156 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Order Pad</title>
-  <style>
-    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
-    body { 
-      margin: 16px; 
-      max-width: 1200px; 
-      background-color: #1a1a1a;
-      color: #e0e0e0;
-    }
-    h1 { font-size: 20px; margin: 0 0 12px; color: #ffffff; }
-    .grid { display: grid; gap: 12px; grid-template-columns: 1.2fr 1fr; }
-    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
-    .card { 
-      border: 1px solid #333; 
-      border-radius: 5px; 
-      padding: 12px; 
-      background-color: #2d2d2d;
-    }
-    .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .row > * { flex: 0 0 auto; }
-    .btn { 
-      padding: 10px 12px; 
-      border: 1px solid #444; 
-      border-radius: 10px; 
-      background: #3a3a3a; 
-      color: #e0e0e0;
-      cursor: pointer; 
-    }
-    .btn:hover { background: #4a4a4a; }
-    .btn:active { transform: scale(0.99); }
-    .btn.primary { background: #1e3a5f; border-color: #2563eb; color: #93c5fd; }
-    .btn.primary:hover { background: #2563eb; color: #ffffff; }
-    .btn.danger { background: #5f1e1e; border-color: #dc2626; color: #fca5a5; }
-    .btn.danger:hover { background: #dc2626; color: #ffffff; }
-    .btn.small { padding: 6px 10px; border-radius: 8px; }
-    input, textarea, select { 
-      border: 1px solid #444; 
-      border-radius: 10px; 
-      padding: 10px; 
-      background-color: #3a3a3a;
-      color: #e0e0e0;
-    }
-    input:focus, textarea:focus, select:focus {
-      border-color: #2563eb;
-      outline: none;
-    }
-    input[type="number"] { width: 110px; }
-    textarea { width: 100%; min-height: 220px; resize: vertical; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border-bottom: 1px solid #444; padding: 8px; text-align: left; }
-    th { font-size: 12px; color: #a0a0a0; }
-    .muted { color: #888; font-size: 12px; }
-    .pill { 
-      border: 1px solid #444; 
-      padding: 6px 10px; 
-      border-radius: 999px; 
-      font-size: 12px;
-      background-color: #3a3a3a;
-    }
-    .spacer { flex: 1 1 auto; }
-    
-    /* Color picker styles */
-    .color-picker {
-      width: 40px;
-      height: 30px;
-      border: 1px solid #444;
-      border-radius: 5px;
-      cursor: pointer;
-      padding: 0;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Simple Order Pad</h1>
+  <div class="app-header">
+    <h1>Order Pad</h1>
+    <div class="header-controls">
+      <span class="pill" id="status">Saved locally</span>
+      <button class="btn tab-btn" data-tab="ordering" id="orderingTab">Order</button>
+      <button class="btn tab-btn active" data-tab="menu" id="menuTab">Edit Menu</button>
+    </div>
+  </div>
 
-  <div class="grid">
-    <div class="card">
-      <div class="row" style="margin-bottom: 10px;">
-        <span class="pill" id="status">Saved locally</span>
-        <span class="spacer"></span>
-        <button class="btn danger" id="clearOrderBtn">Clear order</button>
-      </div>
-
-      <div class="row" style="margin-bottom: 10px;">
-        <label class="muted">Discount %</label>
-        <input type="number" id="discountPct" min="0" step="0.01" value="0" />
-      </div>
-      <div class="row" style="margin-bottom: 10px;">
-        <label class="muted">Title</label>
-        <input id="receiptTitle" value="Receipt" style="min-width: 200px;" />
-      </div>
-
-      <h2 style="font-size: 14px; margin: 12px 0 8px;">Items (tap to add)</h2>
-      <div class="row" id="itemButtons"></div>
-
-      <details style="margin-top: 12px;">
-        <summary style="cursor:pointer;">Edit items & prices</summary>
-        <div style="margin-top: 10px;">
-          <div class="row" style="margin-bottom: 10px;">
-            <input id="newName" placeholder="Item name" style="min-width: 180px;" />
+  <!-- Menu Editing Tab -->
+  <div id="menuTabContent" class="tab-content active">
+    <div class="menu-grid">
+      <!-- Menu Items Panel -->
+      <div class="panel menu-items-panel">
+        <div class="panel-header">
+          <h2>Menu Items</h2>
+          <div class="panel-actions">
+            <button class="btn danger" id="resetDefaultBtn">Reset to defaults</button>
+          </div>
+        </div>
+        
+        <div class="add-item-section">
+          <h3>Add New Item</h3>
+          <div class="add-item-form">
+            <input id="newName" placeholder="Item name" />
             <input id="newPrice" type="number" placeholder="Price" step="0.01" />
             <input id="newColor" type="color" value="#6b7280" class="color-picker" title="Item color" />
             <button class="btn primary" id="addItemBtn">Add item</button>
-            <span class="spacer"></span>
-            <button class="btn danger" id="resetDefaultBtn">Reset to defaults</button>
-          </div>
-          <div class="row" style="margin-bottom: 10px;">
-            <button class="btn" id="saveMenuBtn">Save menu</button>
-            <button class="btn" id="loadMenuBtn">Load menu</button>
-            <input type="file" id="menuFileInput" accept=".json" style="display: none;" />
-            <span class="spacer"></span>
-          </div>
-          <div class="row" style="margin-bottom: 10px;">
-            <label class="muted">Template:</label>
-            <select id="templateSelect" style="border: 1px solid #ccc; border-radius: 10px; padding: 8px; min-width: 160px;">
-            </select>
-            <button class="btn" id="loadTemplateBtn">Load template</button>
-            <span class="spacer"></span>
-          </div>
-          <div id="itemsEditor"></div>
-          <div class="muted" style="margin-top: 6px;">
-            Tip: prices and items are stored in your browser on this device.
           </div>
         </div>
-      </details>
 
-      <h2 style="font-size: 14px; margin: 14px 0 8px;">Current order</h2>
-      <div id="orderTableWrap"></div>
-    </div>
-
-    <div class="card">
-      <div class="row" style="margin-bottom: 10px;">
-        <button class="btn primary" id="copyBtn">Copy receipt</button>
-        <button class="btn" id="selectBtn">Select all</button>
-        <span class="spacer"></span>
-        <span class="muted" id="totalLine"></span>
+        <div class="items-list">
+          <h3>Current Items</h3>
+          <div id="itemsEditor"></div>
+        </div>
       </div>
-      <textarea id="receiptOut" spellcheck="false"></textarea>
-      <div class="muted" style="margin-top: 8px;">
-        Output is plain text for easy paste into messages.
+
+      <!-- Menu Management Panel -->
+      <div class="panel menu-management-panel">
+        <div class="panel-header">
+          <h2>Menu Management</h2>
+        </div>
+
+        <div class="section">
+          <h3>Save & Load</h3>
+          <div class="control-group">
+            <button class="btn" id="saveMenuBtn">Save menu to file</button>
+            <button class="btn" id="loadMenuBtn">Load menu from file</button>
+            <input type="file" id="menuFileInput" accept=".json" style="display: none;" />
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Templates</h3>
+          <div class="control-group">
+            <select id="templateSelect" class="template-select"></select>
+            <button class="btn" id="loadTemplateBtn">Load template</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Share Menu Online</h3>
+          <div class="control-group">
+            <button class="btn primary" id="shareBtn">Share menu</button>
+          </div>
+          
+          <div id="shareCodeSection" class="share-code-section" style="display: none;">
+            <div class="share-code-row">
+              <label>Share code:</label>
+              <span id="shareCodeDisplay" class="share-code"></span>
+              <button class="btn small" id="copyShareCodeBtn">Copy</button>
+            </div>
+            <div class="muted">Share this code with others to let them use your menu.</div>
+          </div>
+          
+          <div class="control-group">
+            <label>Load shared menu:</label>
+            <div class="load-shared-row">
+              <input id="shareCodeInput" placeholder="Enter code" class="code-input" maxlength="6" />
+              <button class="btn" id="loadSharedBtn">Load</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="help-text">
+          <div class="muted">
+            💡 Tip: All changes are automatically saved to your browser.
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
-<script>
-(() => {
-  const $ = (id) => document.getElementById(id);
+  <!-- Ordering Tab -->
+  <div id="orderingTabContent" class="tab-content">
+    <div class="ordering-grid">
+      <div class="panel order-panel">
+        <div class="panel-header">
+          <h2>Place Order</h2>
+          <div class="panel-actions">
+            <button class="btn danger" id="clearOrderBtn">Clear order</button>
+          </div>
+        </div>
 
-  const menuTemplates = {
-    "KOI": [
-      { name: "Guku", price: 100, color: "#16a34a" },         
-      { name: "Pad Thai", price: 200, color: "#16a34a" },     
-      { name: "Cali Maki", price: 100, color: "#16a34a" },    
-      { name: "Salad", price: 80, color: "#16a34a" },         
-      { name: "Sashimi Roll", price: 120, color: "#16a34a" }, 
-      { name: "Tuna Roll", price: 150, color: "#16a34a" },    
-      { name: "Pan Noodles", price: 100, color: "#16a34a" },  
-      { name: "Matcha Tea", price: 80, color: "#2563eb" },    
-      { name: "Sake", price: 100, color: "#2563eb" },         
-      { name: "Sakura Latte", price: 50, color: "#2563eb" }   
-    ],
-    // "Pizza This": [
-    //   { name: "Margherita Pizza", price: 150, color: "#dc2626" },    // Food - Red
-    //   { name: "Pepperoni Pizza", price: 125, color: "#dc2626" },     // Food - Red
-    //   { name: "Supreme Pizza", price: 100, color: "#dc2626" },       // Food - Red
-    //   { name: "Garlic Bread", price: 70, color: "#ea580c" },         // Food (side) - Orange
-    //   { name: "Caesar Salad", price: 85, color: "#16a34a" },         // Food (healthy) - Green
-    //   { name: "Wings (6pc)", price: 95, color: "#ea580c" },          // Food (side) - Orange
-    //   { name: "Soda", price: 30, color: "#2563eb" },                 // Drink - Blue
-    //   { name: "Beer", price: 20, color: "#2563eb" }                  // Drink - Blue
-    // ],
-    // "Food Truck": [
-    //   { name: "Burger", price: 12, color: "#dc2626" },         // Food - Red
-    //   { name: "Cheeseburger", price: 13, color: "#dc2626" },   // Food - Red
-    //   { name: "Chicken Sandwich", price: 11, color: "#dc2626" }, // Food - Red
-    //   { name: "Hot Dog", price: 8, color: "#dc2626" },         // Food - Red
-    //   { name: "Fries", price: 4, color: "#ea580c" },           // Food (side) - Orange
-    //   { name: "Onion Rings", price: 5, color: "#ea580c" },     // Food (side) - Orange
-    //   { name: "Milkshake", price: 6, color: "#8b5cf6" },       // Drink (special) - Purple
-    //   { name: "Soda", price: 2, color: "#2563eb" },            // Drink - Blue
-    //   { name: "Water", price: 1, color: "#06b6d4" }            // Drink (basic) - Cyan
-    // ],
-    // "French Bakery": [
-    //   { name: "Sourdough Bread", price: 6, color: "#92400e" },        // Food (baked) - Brown
-    //   { name: "Croissant", price: 3, color: "#92400e" },              // Food (baked) - Brown
-    //   { name: "Chocolate Chip Cookies", price: 2, color: "#92400e" }, // Food (baked) - Brown
-    //   { name: "Apple Pie Slice", price: 4, color: "#dc2626" },        // Food (dessert) - Red
-    //   { name: "Cheesecake Slice", price: 5, color: "#dc2626" },       // Food (dessert) - Red
-    //   { name: "Cinnamon Roll", price: 3, color: "#92400e" },          // Food (baked) - Brown
-    //   { name: "Scone", price: 3, color: "#92400e" },                  // Food (baked) - Brown
-    //   { name: "Muffin", price: 2, color: "#92400e" },                 // Food (baked) - Brown
-    //   { name: "Coffee", price: 2, color: "#f59e0b" },                 // Energy drink - Amber
-    //   { name: "Espresso", price: 3, color: "#f59e0b" },               // Energy drink - Amber
-    //   { name: "Tea", price: 2, color: "#06b6d4" }                     // Drink - Cyan
-    // ],
-    // "Coffee Shop": [
-    //   { name: "Espresso", price: 3.50, color: "#f59e0b" },            // Energy drink - Amber
-    //   { name: "Cappuccino", price: 4.25, color: "#f59e0b" },          // Energy drink - Amber
-    //   { name: "Latte", price: 4.75, color: "#f59e0b" },               // Energy drink - Amber
-    //   { name: "Americano", price: 3.25, color: "#f59e0b" },           // Energy drink - Amber
-    //   { name: "Mocha", price: 5.25, color: "#8b5cf6" },               // Energy drink (special) - Purple
-    //   { name: "Iced Coffee", price: 3.75, color: "#06b6d4" },         // Energy drink (cold) - Cyan
-    //   { name: "Croissant", price: 3.00, color: "#92400e" },           // Food (baked) - Brown
-    //   { name: "Muffin", price: 2.75, color: "#92400e" },              // Food (baked) - Brown
-    //   { name: "Bagel", price: 2.50, color: "#92400e" },               // Food (baked) - Brown
-    //   { name: "Danish", price: 3.25, color: "#92400e" },              // Food (baked) - Brown
-    //   { name: "Smoothie", price: 5.50, color: "#16a34a" },            // Drink (healthy) - Green
-    //   { name: "Juice", price: 3.00, color: "#2563eb" }                // Drink - Blue
-    // ]
-  };
+        <div class="order-settings">
+          <div class="setting-row">
+            <label>Receipt Title</label>
+            <input id="receiptTitle" value="Receipt" />
+          </div>
+          <div class="setting-row">
+            <label>Discount %</label>
+            <input type="number" id="discountPct" min="0" step="0.01" value="0" />
+          </div>
+        </div>
 
-  const defaultItems = menuTemplates["KOI"].map(item => ({
-    ...item,
-    id: crypto.randomUUID(),
-    color: item.color || "#6b7280"
-  }));
+        <div class="menu-items">
+          <h3>Menu Items</h3>
+          <div id="itemButtons" class="item-buttons"></div>
+        </div>
 
-  const load = (k, fallback) => {
-    try {
-      const v = localStorage.getItem(k);
-      return v ? JSON.parse(v) : fallback;
-    } catch { return fallback; }
-  };
-  const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+        <div class="current-order">
+          <h3>Current Order</h3>
+          <div id="orderTableWrap"></div>
+        </div>
+      </div>
 
-  let items = load("sop_items_v1", defaultItems);
-  let order = load("sop_order_v1", {}); // { itemId: qty }
-  let discountPct = load("sop_discount_v1", 0);
-  let title = load("sop_title_v1", "Receipt");
-
-  $("discountPct").value = discountPct;
-  $("receiptTitle").value = title;
-
-  populateTemplateDropdown();
-
-  function populateTemplateDropdown() {
-    const select = $("templateSelect");
-    select.innerHTML = "";
-    
-    Object.keys(menuTemplates).forEach(templateName => {
-      const option = document.createElement("option");
-      option.value = templateName;
-      option.textContent = templateName;
-      select.appendChild(option);
-    });
-    
-    // Set default to first template
-    if (select.options.length > 0) {
-      select.value = Object.keys(menuTemplates)[0];
-    }
-  }
-
-  function money(n){ return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); }
-
-  function getItem(id){ return items.find(i => i.id === id); }
-
-  function addToOrder(id){
-    order[id] = (order[id] || 0) + 1;
-    persist();
-    render();
-  }
-
-  function setQty(id, qty){
-    if (qty <= 0) delete order[id];
-    else order[id] = qty;
-    persist();
-    render();
-  }
-
-  function persist(){
-    save("sop_items_v1", items);
-    save("sop_order_v1", order);
-    save("sop_discount_v1", Number($("discountPct").value || 0));
-    save("sop_title_v1", $("receiptTitle").value || "Receipt");
-    $("status").textContent = "Saved locally";
-  }
-
-  function calc(){
-    const lines = Object.entries(order)
-      .map(([id, qty]) => {
-        const it = getItem(id);
-        if (!it) return null;
-        const lineTotal = it.price * qty;
-        return { name: it.name, price: it.price, qty, lineTotal };
-      })
-      .filter(Boolean);
-
-    const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
-    const discount = subtotal * (Number($("discountPct").value || 0) / 100);
-    const total = subtotal - discount;
-    return { lines, subtotal, discount, total };
-  }
-
-  function receiptText(){
-    const { lines, subtotal, discount, total } = calc();
-    const t = ($("receiptTitle").value || "Receipt").trim();
-
-    const now = new Date();
-    const stamp = now.toLocaleString();
-
-    const body = [];
-    body.push(t);
-    body.push(stamp);
-    body.push("");
-    if (!lines.length){
-      body.push("(no items)");
-    } else {
-      for (const l of lines){
-        body.push(`${l.qty} x ${l.name} @ $${money(l.price)} = $${money(l.lineTotal)}`);
-      }
-      body.push("");
-      body.push(`Subtotal: $${money(subtotal)}`);
-      const discPct = Number($("discountPct").value || 0);
-      if (discPct > 0) body.push(`Discount (${money(discPct)}%): -$${money(discount)}`);
-      body.push(`Total: $${money(total)}`);
-    }
-    return body.join("\n");
-  }
-
-  function renderButtons(){
-    const wrap = $("itemButtons");
-    wrap.innerHTML = "";
-    items.forEach(it => {
-      const b = document.createElement("button");
-      b.className = "btn";
-      b.textContent = `${it.name} ($${money(it.price)})`;
-      b.style.backgroundColor = it.color || "#6b7280";
-      b.style.borderColor = it.color || "#6b7280";
-      b.style.color = "#ffffff";
-      b.onclick = () => addToOrder(it.id);
-      wrap.appendChild(b);
-    });
-  }
-
-  function renderEditor(){
-    const wrap = $("itemsEditor");
-    wrap.innerHTML = "";
-
-    const table = document.createElement("table");
-    table.innerHTML = `
-      <thead><tr><th>Name</th><th>Price</th><th>Color</th><th></th></tr></thead>
-      <tbody></tbody>
-    `;
-    const tbody = table.querySelector("tbody");
-
-    items.forEach(it => {
-      const tr = document.createElement("tr");
-
-      const nameTd = document.createElement("td");
-      const nameIn = document.createElement("input");
-      nameIn.value = it.name;
-      nameIn.oninput = () => { it.name = nameIn.value; persist(); render(); };
-      nameTd.appendChild(nameIn);
-
-      const priceTd = document.createElement("td");
-      const priceIn = document.createElement("input");
-      priceIn.type = "number";
-      priceIn.step = "0.01";
-      priceIn.value = it.price;
-      priceIn.oninput = () => {
-        it.price = Number(priceIn.value || 0);
-        persist(); render();
-      };
-      priceTd.appendChild(priceIn);
-
-      const colorTd = document.createElement("td");
-      const colorIn = document.createElement("input");
-      colorIn.type = "color";
-      colorIn.className = "color-picker";
-      colorIn.value = it.color || "#6b7280";
-      colorIn.onchange = () => {
-        it.color = colorIn.value;
-        persist(); render();
-      };
-      colorTd.appendChild(colorIn);
-
-      const delTd = document.createElement("td");
-      const delBtn = document.createElement("button");
-      delBtn.className = "btn small danger";
-      delBtn.textContent = "Delete";
-      delBtn.onclick = () => {
-        items = items.filter(x => x.id !== it.id);
-        delete order[it.id];
-        persist(); render();
-      };
-      delTd.appendChild(delBtn);
-
-      tr.appendChild(nameTd);
-      tr.appendChild(priceTd);
-      tr.appendChild(colorTd);
-      tr.appendChild(delTd);
-      tbody.appendChild(tr);
-    });
-
-    wrap.appendChild(table);
-  }
-
-  function renderOrder(){
-    const wrap = $("orderTableWrap");
-    const { lines, subtotal, discount, total } = calc();
-
-    if (!lines.length){
-      wrap.innerHTML = `<div class="muted">No items yet. Tap buttons above to add.</div>`;
-      $("totalLine").textContent = "";
-      return;
-    }
-
-    const table = document.createElement("table");
-    table.innerHTML = `
-      <thead><tr><th>Item</th><th>Qty</th><th>Line</th><th></th></tr></thead>
-      <tbody></tbody>
-    `;
-    const tbody = table.querySelector("tbody");
-
-    for (const [id, qty] of Object.entries(order)){
-      const it = getItem(id);
-      if (!it) continue;
-
-      const tr = document.createElement("tr");
-
-      const itemTd = document.createElement("td");
-      itemTd.textContent = `${it.name} ($${money(it.price)})`;
-
-      const qtyTd = document.createElement("td");
-      const minus10 = document.createElement("button");
-      minus10.className = "btn small";
-      minus10.textContent = "--";
-      minus10.onclick = () => setQty(id, (order[id] || 0) - 5);
-
-      const minus = document.createElement("button");
-      minus.className = "btn small";
-      minus.textContent = "-";
-      minus.onclick = () => setQty(id, (order[id] || 0) - 1);
-
-      const qtySpan = document.createElement("span");
-      qtySpan.style.minWidth = "28px";
-      qtySpan.style.display = "inline-block";
-      qtySpan.style.textAlign = "center";
-      qtySpan.textContent = qty;
-
-      const plus = document.createElement("button");
-      plus.className = "btn small";
-      plus.textContent = "+";
-      plus.onclick = () => setQty(id, (order[id] || 0) + 1);
-
-      const plus10 = document.createElement("button");
-      plus10.className = "btn small";
-      plus10.textContent = "++";
-      plus10.onclick = () => {
-        const current = order[id] || 0;
-        setQty(id, current < 5 ? 5 : current + 5);
-      };
-
-      qtyTd.append(minus10, minus, qtySpan, plus, plus10);
-
-      const lineTd = document.createElement("td");
-      lineTd.textContent = `$${money(it.price * qty)}`;
-
-      const rmTd = document.createElement("td");
-      const rmBtn = document.createElement("button");
-      rmBtn.className = "btn small danger";
-      rmBtn.textContent = "Remove";
-      rmBtn.onclick = () => setQty(id, 0);
-      rmTd.appendChild(rmBtn);
-
-      tr.append(itemTd, qtyTd, lineTd, rmTd);
-      tbody.appendChild(tr);
-    }
-
-    wrap.innerHTML = "";
-    wrap.appendChild(table);
-
-    const discPct = Number($("discountPct").value || 0);
-    const parts = [`Subtotal $${money(subtotal)}`];
-    if (discPct > 0) parts.push(`Discount -$${money(discount)}`);
-    parts.push(`Total $${money(total)}`);
-    $("totalLine").textContent = parts.join("  |  ");
-  }
-
-  function renderReceipt(){
-    $("receiptOut").value = receiptText();
-  }
-
-  function render(){
-    renderButtons();
-    renderEditor();
-    renderOrder();
-    renderReceipt();
-  }
-
-  // Events
-  $("addItemBtn").onclick = () => {
-    const name = ($("newName").value || "").trim();
-    const price = Number($("newPrice").value || 0);
-    const color = $("newColor").value || "#6b7280";
-    if (!name) return;
-
-    items.push({ id: crypto.randomUUID(), name, price, color });
-    $("newName").value = "";
-    $("newPrice").value = "";
-    $("newColor").value = "#6b7280";
-    persist();
-    render();
-  };
-
-  $("discountPct").oninput = () => { persist(); render(); };
-  $("receiptTitle").oninput = () => { persist(); render(); };
-
-  $("clearOrderBtn").onclick = () => {
-    order = {};
-    persist();
-    render();
-  };
-
-  $("resetDefaultBtn").onclick = () => {
-    const selectedTemplate = $("templateSelect").value;
-    if (confirm(`Reset all items to ${selectedTemplate} template? This will remove custom items.`)) {
-      items = menuTemplates[selectedTemplate].map(it => ({ 
-        ...it, 
-        id: crypto.randomUUID(),
-        color: it.color || "#6b7280"
-      }));
-      order = {};
-      persist();
-      render();
-    }
-  };
-
-  $("loadTemplateBtn").onclick = () => {
-    const selectedTemplate = $("templateSelect").value;
-    if (confirm(`Load ${selectedTemplate} template? This will replace your current menu items.`)) {
-      items = menuTemplates[selectedTemplate].map(it => ({ 
-        ...it, 
-        id: crypto.randomUUID(),
-        color: it.color || "#6b7280"
-      }));
-      order = {};
-      persist();
-      render();
-      $("status").textContent = "Template loaded!";
-      setTimeout(() => $("status").textContent = "Saved locally", 1500);
-    }
-  };
-
-  $("copyBtn").onclick = async () => {
-    const text = $("receiptOut").value;
-    try {
-      await navigator.clipboard.writeText(text);
-      $("status").textContent = "Copied!";
-      setTimeout(() => $("status").textContent = "Saved locally", 900);
-    } catch {
-      $("status").textContent = "Copy failed (select + ctrl/cmd+c)";
-    }
-  };
-
-  $("selectBtn").onclick = () => {
-    $("receiptOut").focus();
-    $("receiptOut").select();
-  };
-
-  // Menu save/load functionality
-  $("saveMenuBtn").onclick = () => {
-    const defaultFilename = `menu-${new Date().toISOString().slice(0, 10)}`;
-    const filename = prompt("Enter filename for menu:", defaultFilename);
-    
-    if (!filename) return; // User cancelled
-    
-    // Ensure .json extension
-    const finalFilename = filename.endsWith('.json') ? filename : filename + '.json';
-    
-    const menuData = {
-      items: items.map(item => ({ name: item.name, price: item.price })),
-      exportDate: new Date().toISOString(),
-      version: "1.0"
-    };
-    
-    const dataStr = JSON.stringify(menuData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = finalFilename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    $("status").textContent = "Menu saved!";
-    setTimeout(() => $("status").textContent = "Saved locally", 1500);
-  };
-
-  $("loadMenuBtn").onclick = () => {
-    $("menuFileInput").click();
-  };
-
-  $("menuFileInput").onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const menuData = JSON.parse(event.target.result);
+      <div class="panel receipt-panel">
+        <div class="panel-header">
+          <h2>Receipt</h2>
+          <div class="panel-actions">
+            <button class="btn primary" id="copyBtn">Copy receipt</button>
+            <button class="btn" id="selectBtn">Select all</button>
+          </div>
+        </div>
         
-        if (!menuData.items || !Array.isArray(menuData.items)) {
-          throw new Error("Invalid menu format");
-        }
+        <div class="total-display">
+          <span id="totalLine" class="total-amount"></span>
+        </div>
         
-        const confirmed = confirm(
-          `Load menu with ${menuData.items.length} items?\n` +
-          (menuData.exportDate ? `Exported: ${new Date(menuData.exportDate).toLocaleString()}\n` : "") +
-          "This will replace your current menu items."
-        );
-        
-        if (confirmed) {
-          items = menuData.items.map(item => ({
-            id: crypto.randomUUID(),
-            name: item.name || "Unnamed Item",
-            price: Number(item.price) || 0
-          }));
-          
-          // Clear current order since items changed
-          order = {};
-          
-          persist();
-          render();
-          
-          $("status").textContent = "Menu loaded!";
-          setTimeout(() => $("status").textContent = "Saved locally", 1500);
-        }
-      } catch (error) {
-        alert("Error loading menu file: " + error.message);
-      }
-    };
-    reader.readAsText(file);
-    
-    // Reset file input
-    e.target.value = "";
-  };
+        <textarea id="receiptOut" spellcheck="false" class="receipt-output"></textarea>
+        <div class="muted receipt-help">
+          Output is plain text for easy paste into messages.
+        </div>
+      </div>
+    </div>
+  </div>
 
-  render();
-})();
-</script>
+  <script src="app.js"></script>
 </body>
 </html>

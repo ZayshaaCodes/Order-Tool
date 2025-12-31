@@ -1,0 +1,24 @@
+{
+  "name": "order-tool-api",
+  "version": "1.0.0",
+  "description": "Backend API for Order Tool menu sharing",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "docker:build": "docker build -t order-tool-api:latest .",
+    "docker:run": "docker run -p 3001:3001 order-tool-api:latest",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "morgan": "^1.10.0"
+  },
+  "keywords": ["order", "tool", "menu", "sharing", "api"],
+  "author": "",
+  "license": "MIT"
+}
