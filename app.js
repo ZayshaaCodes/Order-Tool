@@ -1,28 +1,51 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  const defaultGroups = [
-    { id: 1, order: 1, name: "Food" },
-    { id: 2, order: 2, name: "Drinks" }
-  ];
-
   const menuTemplates = {
-    "KOI": [
-      { name: "Guku", price: 100, color: "#16a34a", groupId: 1 },         
-      { name: "Pad Thai", price: 200, color: "#16a34a", groupId: 1 },     
-      { name: "Cali Maki", price: 100, color: "#16a34a", groupId: 1 },    
-      { name: "Salad", price: 80, color: "#16a34a", groupId: 1 },         
-      { name: "Sashimi Roll", price: 120, color: "#16a34a", groupId: 1 }, 
-      { name: "Tuna Roll", price: 140, color: "#16a34a", groupId: 1 },    
-      { name: "Chips", price: 100, color: "#16a34a", groupId: 1 },    
-      { name: "Japanese Pan Noodles", price: 100, color: "#16a34a", groupId: 1 },  
-      { name: "Matcha Tea", price: 80, color: "#2563eb", groupId: 2 },    
-      { name: "Sake", price: 100, color: "#2563eb", groupId: 2 },         
-      { name: "Sakura Latte", price: 50, color: "#2563eb", groupId: 2 }   
-    ],
+    "KOI": {
+      title: "KOI Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Food" },
+        { id: 2, order: 2, name: "Drinks" }
+      ],
+      items: [
+        { name: "Guku", price: 100, color: "#16a34a", groupId: 1 },         
+        { name: "Pad Thai", price: 200, color: "#16a34a", groupId: 1 },     
+        { name: "Cali Maki", price: 100, color: "#16a34a", groupId: 1 },    
+        { name: "Salad", price: 80, color: "#16a34a", groupId: 1 },         
+        { name: "Sashimi Roll", price: 120, color: "#16a34a", groupId: 1 }, 
+        { name: "Tuna Roll", price: 140, color: "#16a34a", groupId: 1 },    
+        { name: "Chips", price: 100, color: "#16a34a", groupId: 1 },    
+        { name: "Japanese Pan Noodles", price: 100, color: "#16a34a", groupId: 1 },  
+        { name: "Matcha Tea", price: 80, color: "#2563eb", groupId: 2 },    
+        { name: "Sake", price: 100, color: "#2563eb", groupId: 2 },         
+        { name: "Sakura Latte", price: 50, color: "#2563eb", groupId: 2 }   
+      ]
+    },    
+    "Dreamworks": {
+      title: "Dreamworks Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Services" },
+        { id: 2, order: 2, name: "Tools" },
+        { id: 3, order: 3, name: "Employees" }
+      ],
+      items: [
+        { name: "Body Repair", price: 75, color: "#16a34a", groupId: 1 },         
+        { name: "Internals", price: 800, color: "#16a34a", groupId: 1 },     
+        { name: "HG Internals", price: 1200, color: "#16a34a", groupId: 1 },    
+        { name: "Upgrade", price: 2500, color: "#16a34a", groupId: 1 },    
+        { name: "Turbo", price: 5000, color: "#16a34a", groupId: 1 },  
+        { name: "Max Upgrade", price: 14000, color: "#16a34a", groupId: 1 },
+        { name: "Lockpick", price: 25, color: "#16a34a", groupId: 2 },         
+        { name: "Repair Kit", price: 150, color: "#16a34a", groupId: 2 }, 
+        { name: "Adv. Repair Kit", price: 450, color: "#16a34a", groupId: 2 }, 
+        { name: "Employee Max Upgrades", price: 10000, color: "#2563eb", groupId: 3 },
+      ]
+    }
   };
 
-  const defaultItems = menuTemplates["KOI"].map((item, index) => ({
+  const defaultTemplate = menuTemplates["KOI"];
+  const defaultItems = defaultTemplate.items.map((item, index) => ({
     ...item,
     id: crypto.randomUUID(),
     color: item.color || "#6b7280",
@@ -39,7 +62,7 @@
   
   const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 
-  let groups = load("sop_groups_v1", defaultGroups);
+  let groups = load("sop_groups_v1", defaultTemplate.groups);
   let items = load("sop_items_v1", defaultItems);
   let order = load("sop_order_v1", {}); // { itemId: qty }
   let discountPct = load("sop_discount_v1", 0);
@@ -753,14 +776,18 @@
   $("resetDefaultBtn").onclick = () => {
     const selectedTemplate = $("templateSelect").value;
     if (confirm(`Reset all items to ${selectedTemplate} template? This will remove custom items.`)) {
-      groups = [...defaultGroups];
-      items = menuTemplates[selectedTemplate].map((it, idx) => ({ 
+      const template = menuTemplates[selectedTemplate];
+      groups = template.groups ? [...template.groups] : [];
+      items = template.items.map((it, idx) => ({ 
         ...it, 
         id: crypto.randomUUID(),
         color: it.color || "#6b7280",
         groupId: it.groupId || null,
         order: idx
       }));
+      if (template.title) {
+        $("receiptTitle").value = template.title;
+      }
       order = {};
       persist();
       render();
@@ -770,14 +797,18 @@
   $("loadTemplateBtn").onclick = () => {
     const selectedTemplate = $("templateSelect").value;
     if (confirm(`Load ${selectedTemplate} template? This will replace your current menu items.`)) {
-      groups = [...defaultGroups];
-      items = menuTemplates[selectedTemplate].map((it, idx) => ({ 
+      const template = menuTemplates[selectedTemplate];
+      groups = template.groups ? [...template.groups] : [];
+      items = template.items.map((it, idx) => ({ 
         ...it, 
         id: crypto.randomUUID(),
         color: it.color || "#6b7280",
         groupId: it.groupId || null,
         order: idx
       }));
+      if (template.title) {
+        $("receiptTitle").value = template.title;
+      }
       order = {};
       persist();
       render();
