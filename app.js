@@ -1,29 +1,27 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  // API configuration
-  const API_BASE = 'http://localhost:3001'; // Change this to your domain when using Cloudflare tunnel
-
   const menuTemplates = {
     "KOI": [
-      { name: "Guku", price: 100, color: "#16a34a" },         
-      { name: "Pad Thai", price: 200, color: "#16a34a" },     
-      { name: "Cali Maki", price: 100, color: "#16a34a" },    
-      { name: "Salad", price: 80, color: "#16a34a" },         
-      { name: "Sashimi Roll", price: 120, color: "#16a34a" }, 
-      { name: "Tuna Roll", price: 140, color: "#16a34a" },    
-      { name: "Chips", price: 100, color: "#16a34a" },    
-      { name: "Japanese Pan Noodles", price: 100, color: "#16a34a" },  
-      { name: "Matcha Tea", price: 80, color: "#2563eb" },    
-      { name: "Sake", price: 100, color: "#2563eb" },         
-      { name: "Sakura Latte", price: 50, color: "#2563eb" }   
+      { name: "Guku", price: 100, color: "#16a34a", group: "Food" },         
+      { name: "Pad Thai", price: 200, color: "#16a34a", group: "Food" },     
+      { name: "Cali Maki", price: 100, color: "#16a34a", group: "Food" },    
+      { name: "Salad", price: 80, color: "#16a34a", group: "Food" },         
+      { name: "Sashimi Roll", price: 120, color: "#16a34a", group: "Food" }, 
+      { name: "Tuna Roll", price: 140, color: "#16a34a", group: "Food" },    
+      { name: "Chips", price: 100, color: "#16a34a", group: "Food" },    
+      { name: "Japanese Pan Noodles", price: 100, color: "#16a34a", group: "Food" },  
+      { name: "Matcha Tea", price: 80, color: "#2563eb", group: "Drinks" },    
+      { name: "Sake", price: 100, color: "#2563eb", group: "Drinks" },         
+      { name: "Sakura Latte", price: 50, color: "#2563eb", group: "Drinks" }   
     ],
   };
 
   const defaultItems = menuTemplates["KOI"].map(item => ({
     ...item,
     id: crypto.randomUUID(),
-    color: item.color || "#6b7280"
+    color: item.color || "#6b7280",
+    group: item.group || "Ungrouped"
   }));
 
   const load = (k, fallback) => {
@@ -137,15 +135,37 @@
   function renderButtons() {
     const wrap = $("itemButtons");
     wrap.innerHTML = "";
+    
+    // Group items by category
+    const grouped = {};
     items.forEach(it => {
-      const b = document.createElement("button");
-      b.className = "btn";
-      b.textContent = `${it.name} ($${money(it.price)})`;
-      b.style.backgroundColor = it.color || "#6b7280";
-      b.style.borderColor = it.color || "#6b7280";
-      b.style.color = "#ffffff";
-      b.onclick = () => addToOrder(it.id);
-      wrap.appendChild(b);
+      const group = it.group || "Ungrouped";
+      if (!grouped[group]) grouped[group] = [];
+      grouped[group].push(it);
+    });
+    
+    // Render each group
+    Object.keys(grouped).sort().forEach(groupName => {
+      const groupHeader = document.createElement("h4");
+      groupHeader.className = "item-group-header";
+      groupHeader.textContent = groupName;
+      wrap.appendChild(groupHeader);
+      
+      const groupContainer = document.createElement("div");
+      groupContainer.className = "item-group-buttons";
+      
+      grouped[groupName].forEach(it => {
+        const b = document.createElement("button");
+        b.className = "btn";
+        b.textContent = `${it.name} ($${money(it.price)})`;
+        b.style.backgroundColor = it.color || "#6b7280";
+        b.style.borderColor = it.color || "#6b7280";
+        b.style.color = "#ffffff";
+        b.onclick = () => addToOrder(it.id);
+        groupContainer.appendChild(b);
+      });
+      
+      wrap.appendChild(groupContainer);
     });
   }
 
@@ -155,7 +175,7 @@
 
     const table = document.createElement("table");
     table.innerHTML = `
-      <thead><tr><th>Name</th><th>Price</th><th>Color</th><th></th></tr></thead>
+      <thead><tr><th>Name</th><th>Price</th><th>Group</th><th>Color</th><th></th></tr></thead>
       <tbody></tbody>
     `;
     const tbody = table.querySelector("tbody");
@@ -179,6 +199,16 @@
         persist(); render();
       };
       priceTd.appendChild(priceIn);
+
+      const groupTd = document.createElement("td");
+      const groupIn = document.createElement("input");
+      groupIn.value = it.group || "Ungrouped";
+      groupIn.placeholder = "Group";
+      groupIn.oninput = () => {
+        it.group = groupIn.value || "Ungrouped";
+        persist(); render();
+      };
+      groupTd.appendChild(groupIn);
 
       const colorTd = document.createElement("td");
       const colorIn = document.createElement("input");
@@ -204,6 +234,7 @@
 
       tr.appendChild(nameTd);
       tr.appendChild(priceTd);
+      tr.appendChild(groupTd);
       tr.appendChild(colorTd);
       tr.appendChild(delTd);
       tbody.appendChild(tr);
@@ -317,92 +348,41 @@
     renderEditor();
     renderOrder();
     renderReceipt();
+    updateJsonTextbox();
   }
 
-  // Generate a random 6-character code for sharing
-  function generateShareCode() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < 6; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+  // Update JSON textbox with current menu
+  function updateJsonTextbox() {
+    const menuData = {
+      items: items.map(item => ({ 
+        name: item.name, 
+        price: item.price, 
+        color: item.color,
+        group: item.group || "Ungrouped"
+      })),
+      title: $("receiptTitle").value || "Receipt",
+      version: "2.0"
+    };
+    $("menuJsonText").value = JSON.stringify(menuData, null, 2);
   }
 
-  // Share menu online
-  async function shareMenu() {
-    try {
-      $("shareBtn").disabled = true;
-      $("shareBtn").textContent = "Sharing...";
-      
-      const menuData = {
-        items: items.map(item => ({ 
-          name: item.name, 
-          price: item.price, 
-          color: item.color 
-        })),
-        title: $("receiptTitle").value || "Receipt",
-        createdAt: new Date().toISOString(),
-        version: "2.0"
-      };
-
-      const response = await fetch(`${API_BASE}/api/share`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(menuData)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      // Show the share code
-      $("shareCodeDisplay").textContent = result.code;
-      $("shareCodeSection").style.display = "block";
-      
-      $("status").textContent = "Menu shared successfully!";
-      setTimeout(() => $("status").textContent = "Saved locally", 2000);
-
-    } catch (error) {
-      console.error('Error sharing menu:', error);
-      $("status").textContent = "Failed to share menu (check connection)";
-      setTimeout(() => $("status").textContent = "Saved locally", 2000);
-    } finally {
-      $("shareBtn").disabled = false;
-      $("shareBtn").textContent = "Share menu";
-    }
-  }
-
-  // Load menu from share code
-  async function loadSharedMenu() {
-    const code = $("shareCodeInput").value.trim().toUpperCase();
-    if (!code) {
-      alert("Please enter a share code");
+  // Load menu from JSON textbox
+  function loadFromJson() {
+    const jsonText = $("menuJsonText").value.trim();
+    if (!jsonText) {
+      alert("Please enter JSON data");
       return;
     }
 
     try {
-      $("loadSharedBtn").disabled = true;
-      $("loadSharedBtn").textContent = "Loading...";
-
-      const response = await fetch(`${API_BASE}/api/menu/${code}`);
+      const menuData = JSON.parse(jsonText);
       
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("Menu not found. Check your code and try again.");
-        }
-        throw new Error(`Server error: ${response.status}`);
+      if (!menuData.items || !Array.isArray(menuData.items)) {
+        throw new Error("Invalid menu format - missing items array");
       }
-
-      const menuData = await response.json();
       
       const confirmed = confirm(
-        `Load shared menu with ${menuData.items.length} items?\n` +
-        `Shared: ${new Date(menuData.createdAt).toLocaleString()}\n` +
+        `Load menu with ${menuData.items.length} items?\n` +
         "This will replace your current menu items."
       );
 
@@ -411,45 +391,37 @@
           id: crypto.randomUUID(),
           name: item.name || "Unnamed Item",
           price: Number(item.price) || 0,
-          color: item.color || "#6b7280"
+          color: item.color || "#6b7280",
+          group: item.group || "Ungrouped"
         }));
         
         if (menuData.title) {
           $("receiptTitle").value = menuData.title;
         }
         
-        // Clear current order since items changed
         order = {};
-        
         persist();
         render();
         
-        $("shareCodeInput").value = "";
-        $("status").textContent = "Shared menu loaded!";
-        setTimeout(() => $("status").textContent = "Saved locally", 2000);
+        $("status").textContent = "Menu loaded from JSON!";
+        setTimeout(() => $("status").textContent = "Saved locally", 1500);
       }
 
     } catch (error) {
-      console.error('Error loading shared menu:', error);
-      alert("Error: " + error.message);
-    } finally {
-      $("loadSharedBtn").disabled = false;
-      $("loadSharedBtn").textContent = "Load";
+      alert("Error parsing JSON: " + error.message);
     }
   }
 
-  // Copy share code to clipboard
-  async function copyShareCode() {
-    const code = $("shareCodeDisplay").textContent;
+  // Copy JSON to clipboard
+  async function copyJson() {
+    const jsonText = $("menuJsonText").value;
     try {
-      await navigator.clipboard.writeText(code);
-      $("status").textContent = "Share code copied!";
+      await navigator.clipboard.writeText(jsonText);
+      $("status").textContent = "JSON copied!";
       setTimeout(() => $("status").textContent = "Saved locally", 1000);
     } catch {
-      // Fallback for browsers that don't support clipboard API
-      $("shareCodeDisplay").select();
-      $("shareCodeDisplay").setSelectionRange(0, 99999);
-      $("status").textContent = "Code selected - press Ctrl+C to copy";
+      $("menuJsonText").select();
+      $("status").textContent = "JSON selected - press Ctrl+C to copy";
     }
   }
 
@@ -458,12 +430,14 @@
     const name = ($("newName").value || "").trim();
     const price = Number($("newPrice").value || 0);
     const color = $("newColor").value || "#6b7280";
+    const group = ($("newGroup").value || "Ungrouped").trim();
     if (!name) return;
 
-    items.push({ id: crypto.randomUUID(), name, price, color });
+    items.push({ id: crypto.randomUUID(), name, price, color, group });
     $("newName").value = "";
     $("newPrice").value = "";
     $("newColor").value = "#6b7280";
+    $("newGroup").value = "";
     persist();
     render();
   };
@@ -483,7 +457,8 @@
       items = menuTemplates[selectedTemplate].map(it => ({ 
         ...it, 
         id: crypto.randomUUID(),
-        color: it.color || "#6b7280"
+        color: it.color || "#6b7280",
+        group: it.group || "Ungrouped"
       }));
       order = {};
       persist();
@@ -497,7 +472,8 @@
       items = menuTemplates[selectedTemplate].map(it => ({ 
         ...it, 
         id: crypto.randomUUID(),
-        color: it.color || "#6b7280"
+        color: it.color || "#6b7280",
+        group: it.group || "Ungrouped"
       }));
       order = {};
       persist();
@@ -536,7 +512,8 @@
       items: items.map(item => ({ 
         name: item.name, 
         price: item.price, 
-        color: item.color 
+        color: item.color,
+        group: item.group || "Ungrouped"
       })),
       title: $("receiptTitle").value || "Receipt",
       exportDate: new Date().toISOString(),
@@ -587,7 +564,8 @@
             id: crypto.randomUUID(),
             name: item.name || "Unnamed Item",
             price: Number(item.price) || 0,
-            color: item.color || "#6b7280"
+            color: item.color || "#6b7280",
+            group: item.group || "Ungrouped"
           }));
           
           if (menuData.title) {
@@ -609,17 +587,9 @@
     e.target.value = "";
   };
 
-  // Share functionality event listeners
-  $("shareBtn").onclick = shareMenu;
-  $("loadSharedBtn").onclick = loadSharedMenu;
-  $("copyShareCodeBtn").onclick = copyShareCode;
-
-  // Allow pressing Enter to load shared menu
-  $("shareCodeInput").onkeypress = (e) => {
-    if (e.key === 'Enter') {
-      loadSharedMenu();
-    }
-  };
+  // JSON textbox event listeners
+  $("loadJsonBtn").onclick = loadFromJson;
+  $("copyJsonBtn").onclick = copyJson;
 
   // Tab switching functionality
   function switchTab(tabName) {
