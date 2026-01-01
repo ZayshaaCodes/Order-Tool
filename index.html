@@ -77,6 +77,14 @@
         </div>
 
         <div class="section">
+          <h3>Receipt Settings</h3>
+          <div class="control-group">
+            <label>Receipt Title</label>
+            <input id="receiptTitle" value="Receipt" style="flex: 1;" />
+          </div>
+        </div>
+
+        <div class="section">
           <h3>Templates</h3>
           <div class="control-group">
             <select id="templateSelect" class="template-select"></select>
@@ -118,15 +126,6 @@
           </div>
         </div>
 
-        <div class="order-settings">
-          <div class="setting-row">
-            <label>Receipt Title</label>
-            <input id="receiptTitle" value="Receipt" />
-            <label>Discount %</label>
-            <input type="number" id="discountPct" min="0" step="0.01" value="0" />
-          </div>
-        </div>
-
         <div class="menu-items">
           <h3>Menu Items</h3>
           <div id="itemButtons" class="item-buttons"></div>
@@ -145,6 +144,11 @@
             <button class="btn primary" id="copyBtn">Copy receipt</button>
             <button class="btn" id="selectBtn">Select all</button>
           </div>
+        </div>
+        
+        <div class="control-group" style="margin-bottom: 8px;">
+          <label>Discount %</label>
+          <input type="number" id="discountPct" min="0" step="0.01" value="0" style="width: 80px;" />
         </div>
         
         <div class="total-display">
