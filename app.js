@@ -11,8 +11,9 @@
       { name: "Cali Maki", price: 100, color: "#16a34a" },    
       { name: "Salad", price: 80, color: "#16a34a" },         
       { name: "Sashimi Roll", price: 120, color: "#16a34a" }, 
-      { name: "Tuna Roll", price: 150, color: "#16a34a" },    
-      { name: "Pan Noodles", price: 100, color: "#16a34a" },  
+      { name: "Tuna Roll", price: 140, color: "#16a34a" },    
+      { name: "Chips", price: 100, color: "#16a34a" },    
+      { name: "Japanese Pan Noodles", price: 100, color: "#16a34a" },  
       { name: "Matcha Tea", price: 80, color: "#2563eb" },    
       { name: "Sake", price: 100, color: "#2563eb" },         
       { name: "Sakura Latte", price: 50, color: "#2563eb" }   
