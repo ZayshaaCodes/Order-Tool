@@ -1,5 +1,33 @@
 (() => {
   const $ = (id) => document.getElementById(id);
+  
+  // DOM helper utilities
+  const createElement = (tag, className = '', attributes = {}) => {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    Object.entries(attributes).forEach(([key, value]) => {
+      if (key === 'text') el.textContent = value;
+      else if (key === 'html') el.innerHTML = value;
+      else if (key.startsWith('on')) el[key] = value;
+      else el.setAttribute(key, value);
+    });
+    return el;
+  };
+  
+  const createButton = (text, className = 'btn', onClick = null) => {
+    const btn = createElement('button', className, { text });
+    if (onClick) btn.onclick = onClick;
+    return btn;
+  };
+  
+  const createInput = (type, className, value = '', attributes = {}) => {
+    return createElement('input', className, { type, value, ...attributes });
+  };
+  
+  const showStatus = (message, duration = 1500) => {
+    $("status").textContent = message;
+    if (duration) setTimeout(() => $("status").textContent = "Saved locally", duration);
+  };
 
   const menuTemplates = {
     "KOI": {
@@ -7,6 +35,13 @@
       groups: [
         { id: 1, order: 1, name: "Food" },
         { id: 2, order: 2, name: "Drinks" }
+      ],
+      specials: [
+        { name: "Trent Special", price: 800, color: "#dc2626", groupId: 1, subItems: ["5x Sakura Latte", "5x Tuna Roll"] },
+        { name: "Brokie Meal", price: 250, color: "#dc2626", groupId: 1, subItems: ["1x Guku", "1x Chips", "1x Matcha Tea"] },
+        { name: "Sushi Sample", price: 500, color: "#dc2626", groupId: 1, subItems: ["1x Cali Maki", "1x Sashimi Roll", "1x Tuna Roll", "3x Sakura Latte"] },
+        { name: "Quarter Zip Special", price: 300, color: "#dc2626", groupId: 1, subItems: ["2x Salad", "2x Matcha Tea"] },
+        { name: "Good 4 The Soul", price: 350, color: "#dc2626", groupId: 1, subItems: ["1x Pad Thai", "1x Tuna Roll", "Drink Of Choice"] }
       ],
       items: [
         { name: "Guku", price: 100, color: "#16a34a", groupId: 1 },         
@@ -28,6 +63,9 @@
         { id: 1, order: 1, name: "Services" },
         { id: 2, order: 2, name: "Tools" },
         { id: 3, order: 3, name: "Employees" }
+      ],
+      specials: [
+        { name: "Full Service Package", price: 15000, color: "#dc2626", groupId: 1 }
       ],
       items: [
         { name: "Body Repair", price: 75, color: "#16a34a", groupId: 1 },         
@@ -52,6 +90,14 @@
     groupId: item.groupId || null,
     order: index
   }));
+  
+  const defaultSpecials = defaultTemplate.specials.map((special, index) => ({
+    ...special,
+    id: crypto.randomUUID(),
+    color: special.color || "#dc2626",
+    order: index,
+    subItems: special.subItems || []
+  }));
 
   const load = (k, fallback) => {
     try {
@@ -64,6 +110,7 @@
 
   let groups = load("sop_groups_v1", defaultTemplate.groups);
   let items = load("sop_items_v1", defaultItems);
+  let specials = load("sop_specials_v1", defaultSpecials);
   let order = load("sop_order_v1", {}); // { itemId: qty }
   let discountPct = load("sop_discount_v1", 0);
   let title = load("sop_title_v1", "Receipt");
@@ -96,7 +143,7 @@
   }
 
   function getItem(id) { 
-    return items.find(i => i.id === id); 
+    return items.find(i => i.id === id) || specials.find(s => s.id === id);
   }
 
   function addToOrder(id) {
@@ -115,6 +162,7 @@
   function persist() {
     save("sop_groups_v1", groups);
     save("sop_items_v1", items);
+    save("sop_specials_v1", specials);
     save("sop_order_v1", order);
     save("sop_discount_v1", Number($("discountPct").value || 0));
     save("sop_title_v1", $("receiptTitle").value || "Receipt");
@@ -136,6 +184,41 @@
     const total = subtotal - discount;
     return { lines, subtotal, discount, total };
   }
+  
+  // Calculate component breakdown (for inventory/kitchen prep)
+  function getComponentBreakdown() {
+    const components = {};
+    
+    // Helper to parse "2x Item" or "Item" format
+    const parseSubItem = (subItem) => {
+      const match = subItem.trim().match(/^(\d+)x\s*(.+)$/);
+      if (match) {
+        return { qty: parseInt(match[1]), name: match[2].trim() };
+      }
+      return { qty: 1, name: subItem.trim() };
+    };
+    
+    Object.entries(order).forEach(([id, qty]) => {
+      const item = getItem(id);
+      if (!item) return;
+      
+      // If it's a special with sub-items, count each sub-item
+      if (item.subItems && item.subItems.length > 0) {
+        item.subItems.forEach(subItemStr => {
+          const { qty: subQty, name } = parseSubItem(subItemStr);
+          components[name] = (components[name] || 0) + (qty * subQty);
+        });
+      } else {
+        // Regular item, count it directly
+        components[item.name] = (components[item.name] || 0) + qty;
+      }
+    });
+    
+    // Convert to sorted array
+    return Object.entries(components)
+      .map(([name, qty]) => ({ name, qty }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
 
   function receiptText() {
     const { lines, subtotal, discount, total } = calc();
@@ -153,12 +236,40 @@
     } else {
       for (const l of lines) {
         body.push(`${l.qty} x ${l.name} @ $${money(l.price)} = $${money(l.lineTotal)}`);
+        // Add sub-items if this is a special with sub-items
+        const item = getItem(Object.keys(order).find(id => {
+          const it = getItem(id);
+          return it && it.name === l.name;
+        }));
+        if (item && item.subItems && item.subItems.length > 0) {
+          item.subItems.forEach(subItem => {
+            body.push(`  - ${subItem}`);
+          });
+        }
       }
       body.push("");
       body.push(`Subtotal: $${money(subtotal)}`);
       const discPct = Number($("discountPct").value || 0);
       if (discPct > 0) body.push(`Discount (${money(discPct)}%): -$${money(discount)}`);
       body.push(`Total: $${money(total)}`);
+      
+      // Add component breakdown if enabled and there are specials
+      const showBreakdown = $("showBreakdownInReceipt") && $("showBreakdownInReceipt").checked;
+      if (showBreakdown) {
+        const components = getComponentBreakdown();
+        const hasSpecials = Object.keys(order).some(id => {
+          const item = getItem(id);
+          return item && item.subItems && item.subItems.length > 0;
+        });
+        
+        if (hasSpecials && components.length > 0) {
+          body.push("");
+          body.push("--- Component Breakdown ---");
+          components.forEach(({ name, qty }) => {
+            body.push(`${qty}x ${name}`);
+          });
+        }
+      }
     }
     return body.join("\n");
   }
@@ -221,6 +332,30 @@
       
       wrap.appendChild(groupContainer);
     }
+    
+    // Render specials section
+    if (specials.length > 0) {
+      const specialsHeader = document.createElement("h4");
+      specialsHeader.className = "item-group-header specials-header";
+      specialsHeader.textContent = "Specials";
+      wrap.appendChild(specialsHeader);
+      
+      const specialsContainer = document.createElement("div");
+      specialsContainer.className = "item-group-buttons";
+      
+      [...specials].sort((a, b) => (a.order || 0) - (b.order || 0)).forEach(special => {
+        const b = document.createElement("button");
+        b.className = "btn special-btn";
+        b.textContent = `${special.name} ($${money(special.price)})`;
+        b.style.backgroundColor = special.color || "#dc2626";
+        b.style.borderColor = special.color || "#dc2626";
+        b.style.color = "#ffffff";
+        b.onclick = () => addToOrder(special.id);
+        specialsContainer.appendChild(b);
+      });
+      
+      wrap.appendChild(specialsContainer);
+    }
   }
 
   function renderGroups() {
@@ -279,10 +414,133 @@
 
     wrap.appendChild(table);
   }
+  
+  function renderSpecialsEditor() {
+    const wrap = $("specialsEditor");
+    wrap.innerHTML = "";
+    
+    if (specials.length === 0) {
+      wrap.appendChild(createElement('div', 'empty-state', { text: 'No specials yet. Add one above.' }));
+      return;
+    }
+    
+    const container = createElement('div', 'group-container');
+    const itemsList = createElement('div', 'group-items-list');
+    
+    const setupDraggable = (wrapper, id, container) => {
+      wrapper.draggable = true;
+      wrapper.ondragstart = (e) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", id);
+        wrapper.classList.add("dragging");
+      };
+      wrapper.ondragend = () => wrapper.classList.remove("dragging");
+      wrapper.ondragover = (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(container, e.clientY);
+        const dragging = document.querySelector(".dragging");
+        if (afterElement == null) container.appendChild(dragging);
+        else container.insertBefore(dragging, afterElement);
+      };
+    };
+    
+    [...specials].sort((a, b) => (a.order || 0) - (b.order || 0)).forEach(special => {
+      // Create a wrapper for the special and its sub-items
+      const specialWrapper = createElement('div', 'special-wrapper');
+      specialWrapper.dataset.specialId = special.id;
+      setupDraggable(specialWrapper, special.id, itemsList);
+      
+      const row = createElement('div', 'item-row');
+      
+      const handle = createElement('div', 'drag-handle', { html: '⋮⋮' });
+      
+      const nameInput = createInput('text', 'item-input', special.name, {
+        oninput: () => { special.name = nameInput.value; persist(); }
+      });
+      
+      const priceInput = createInput('number', 'item-input price-input', special.price, {
+        step: '0.01',
+        oninput: () => {
+          special.price = Number(priceInput.value || 0);
+          persist(); renderButtons(); renderReceipt();
+        }
+      });
+      
+      const colorInput = createInput('color', 'color-picker', special.color || '#dc2626', {
+        onchange: () => {
+          special.color = colorInput.value;
+          persist(); renderButtons();
+        }
+      });
+      
+      const copyBtn = createButton('⎘', 'btn small', () => {
+        const maxOrder = specials.length > 0 ? Math.max(...specials.map(s => s.order || 0)) : -1;
+        specials.push({
+          id: crypto.randomUUID(),
+          name: special.name + " (copy)",
+          price: special.price,
+          color: special.color,
+          groupId: special.groupId,
+          order: maxOrder + 1,
+          subItems: [...(special.subItems || [])]
+        });
+        persist(); render();
+      });
+      copyBtn.title = "Duplicate special";
+      
+      const deleteBtn = createButton('×', 'btn small danger', () => {
+        specials = specials.filter(x => x.id !== special.id);
+        delete order[special.id];
+        persist(); render();
+      });
+      
+      row.appendChild(handle);
+      row.appendChild(nameInput);
+      row.appendChild(priceInput);
+      row.appendChild(colorInput);
+      row.appendChild(copyBtn);
+      row.appendChild(deleteBtn);
+      
+      specialWrapper.appendChild(row);
+      
+      // Add sub-items input field
+      const subItemsRow = createElement('div', 'sub-items-row');
+      const subItemsLabel = createElement('label', 'sub-items-label', { text: 'Sub-items:' });
+      const subItemsInput = createInput('text', 'sub-items-input', (special.subItems || []).join(", "), {
+        placeholder: 'e.g., 2x Guku, 1x Tea, Salad',
+        oninput: () => {
+          special.subItems = subItemsInput.value.split(',').map(s => s.trim()).filter(s => s);
+          persist(); renderReceipt();
+        }
+      });
+      
+      subItemsRow.append(subItemsLabel, subItemsInput);
+      specialWrapper.appendChild(subItemsRow);
+      
+      itemsList.appendChild(specialWrapper);
+    });
+    
+    // Reorder specials after drag
+    itemsList.ondrop = () => {
+      setTimeout(() => {
+        const wrappers = itemsList.querySelectorAll(".special-wrapper");
+        wrappers.forEach((wrapper, index) => {
+          const specialId = wrapper.dataset.specialId;
+          const special = specials.find(s => s.id === specialId);
+          if (special) special.order = index;
+        });
+        persist();
+      }, 0);
+    };
+    
+    container.appendChild(itemsList);
+    wrap.appendChild(container);
+  }
 
   function updateGroupSelects() {
-    const selects = [$("newGroupSelect")];
+    const selects = [$("newGroupSelect"), $("newSpecialGroupSelect")];
     selects.forEach(select => {
+      if (!select) return;
       const currentValue = select.value;
       select.innerHTML = '<option value="">No Group</option>';
       [...groups].sort((a, b) => a.order - b.order).forEach(group => {
@@ -501,7 +759,7 @@
   }
   
   function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll(".item-row:not(.dragging)")];
+    const draggableElements = [...container.querySelectorAll(".special-wrapper:not(.dragging), .item-row:not(.dragging)")];
     
     return draggableElements.reduce((closest, child) => {
       const box = child.getBoundingClientRect();
@@ -546,10 +804,12 @@
     const { lines, subtotal, discount, total } = calc();
 
     if (!lines.length) {
-      wrap.innerHTML = `<div class="muted">No items yet. Tap buttons above to add.</div>`;
+      wrap.innerHTML = `<div class="empty-state">No items yet. Tap buttons above to add.</div>`;
       $("totalLine").textContent = "";
       return;
     }
+    
+    wrap.innerHTML = "";
 
     const table = document.createElement("table");
     table.innerHTML = `
@@ -627,7 +887,6 @@
       tbody.appendChild(tr);
     }
 
-    wrap.innerHTML = "";
     wrap.appendChild(table);
 
     const discPct = Number($("discountPct").value || 0);
@@ -639,10 +898,68 @@
 
   function renderReceipt() {
     $("receiptOut").value = receiptText();
+    renderComponentBreakdown();
+  }
+  
+  function renderComponentBreakdown() {
+    const breakdownWrap = $("componentBreakdownWrap");
+    if (!breakdownWrap) return;
+    
+    const components = getComponentBreakdown();
+    const hasSpecials = Object.keys(order).some(id => {
+      const item = getItem(id);
+      return item && item.subItems && item.subItems.length > 0;
+    });
+    
+    if (!hasSpecials || components.length === 0) {
+      breakdownWrap.style.display = 'none';
+      return;
+    }
+    
+    breakdownWrap.style.display = 'block';
+    breakdownWrap.innerHTML = '';
+    
+    const breakdownSection = createElement('div', 'component-breakdown');
+    const breakdownHeader = createElement('div', 'component-breakdown-header');
+    
+    const headerText = createElement('h4', 'component-breakdown-title', {
+      text: '📋 Component Breakdown (Kitchen/Inventory)'
+    });
+    
+    const toggleBtn = createButton('Hide', 'btn small', () => {
+      const list = breakdownSection.querySelector('.component-list');
+      const isHidden = list.style.display === 'none';
+      list.style.display = isHidden ? 'block' : 'none';
+      toggleBtn.textContent = isHidden ? 'Hide' : 'Show';
+    });
+    
+    breakdownHeader.append(headerText, toggleBtn);
+    
+    const componentList = createElement('div', 'component-list');
+    
+    const componentTable = createElement('table', 'component-table');
+    componentTable.innerHTML = `
+      <thead><tr><th>Item</th><th>Total Qty</th></tr></thead>
+      <tbody></tbody>
+    `;
+    const tbody = componentTable.querySelector('tbody');
+    
+    components.forEach(({ name, qty }) => {
+      const tr = createElement('tr');
+      const nameTd = createElement('td', '', { text: name });
+      const qtyTd = createElement('td', 'component-qty', { text: qty });
+      tr.append(nameTd, qtyTd);
+      tbody.appendChild(tr);
+    });
+    
+    componentList.appendChild(componentTable);
+    breakdownSection.append(breakdownHeader, componentList);
+    breakdownWrap.appendChild(breakdownSection);
   }
 
   function render() {
     renderGroups();
+    renderSpecialsEditor();
     updateGroupSelects();
     renderButtons();
     renderEditor();
@@ -655,6 +972,13 @@
   function updateJsonTextbox() {
     const menuData = {
       groups: groups,
+      specials: specials.map(special => ({
+        name: special.name,
+        price: special.price,
+        color: special.color,
+        groupId: special.groupId || null,
+        subItems: special.subItems || []
+      })),
       items: items.map(item => ({ 
         name: item.name, 
         price: item.price, 
@@ -694,6 +1018,20 @@
           groups = [];
         }
         
+        if (menuData.specials && Array.isArray(menuData.specials)) {
+          specials = menuData.specials.map((special, idx) => ({
+            id: crypto.randomUUID(),
+            name: special.name || "Unnamed Special",
+            price: Number(special.price) || 0,
+            color: special.color || "#dc2626",
+            groupId: special.groupId || null,
+            order: special.order ?? idx,
+            subItems: special.subItems || []
+          }));
+        } else {
+          specials = [];
+        }
+        
         items = menuData.items.map((item, idx) => ({
           id: crypto.randomUUID(),
           name: item.name || "Unnamed Item",
@@ -710,9 +1048,7 @@
         order = {};
         persist();
         render();
-        
-        $("status").textContent = "Menu loaded from JSON!";
-        setTimeout(() => $("status").textContent = "Saved locally", 1500);
+        showStatus("Menu loaded from JSON!");
       }
 
     } catch (error) {
@@ -725,11 +1061,10 @@
     const jsonText = $("menuJsonText").value;
     try {
       await navigator.clipboard.writeText(jsonText);
-      $("status").textContent = "JSON copied!";
-      setTimeout(() => $("status").textContent = "Saved locally", 1000);
+      showStatus("JSON copied!", 1000);
     } catch {
       $("menuJsonText").select();
-      $("status").textContent = "JSON selected - press Ctrl+C to copy";
+      showStatus("JSON selected - press Ctrl+C to copy", 0);
     }
   }
 
@@ -743,6 +1078,23 @@
     groups.push({ id: newId, order, name });
     $("newGroupName").value = "";
     $("newGroupOrder").value = "";
+    persist();
+    render();
+  };
+  
+  $("addSpecialBtn").onclick = () => {
+    const name = ($("newSpecialName").value || "").trim();
+    const price = Number($("newSpecialPrice").value || 0);
+    const color = $("newSpecialColor").value || "#dc2626";
+    const groupId = $("newSpecialGroupSelect").value ? Number($("newSpecialGroupSelect").value) : null;
+    if (!name) return;
+
+    const maxOrder = specials.length > 0 ? Math.max(...specials.map(s => s.order || 0)) : -1;
+    specials.push({ id: crypto.randomUUID(), name, price, color, groupId, order: maxOrder + 1 });
+    $("newSpecialName").value = "";
+    $("newSpecialPrice").value = "";
+    $("newSpecialColor").value = "#dc2626";
+    $("newSpecialGroupSelect").value = "";
     persist();
     render();
   };
@@ -766,6 +1118,9 @@
 
   $("discountPct").oninput = () => { persist(); render(); };
   $("receiptTitle").oninput = () => { persist(); render(); };
+  if ($("showBreakdownInReceipt")) {
+    $("showBreakdownInReceipt").onchange = () => { renderReceipt(); };
+  }
 
   $("clearOrderBtn").onclick = () => {
     order = {};
@@ -778,6 +1133,13 @@
     if (confirm(`Reset all items to ${selectedTemplate} template? This will remove custom items.`)) {
       const template = menuTemplates[selectedTemplate];
       groups = template.groups ? [...template.groups] : [];
+      specials = template.specials ? template.specials.map((s, idx) => ({
+        ...s,
+        id: crypto.randomUUID(),
+        color: s.color || "#dc2626",
+        order: idx,
+        subItems: s.subItems || []
+      })) : [];
       items = template.items.map((it, idx) => ({ 
         ...it, 
         id: crypto.randomUUID(),
@@ -799,6 +1161,13 @@
     if (confirm(`Load ${selectedTemplate} template? This will replace your current menu items.`)) {
       const template = menuTemplates[selectedTemplate];
       groups = template.groups ? [...template.groups] : [];
+      specials = template.specials ? template.specials.map((s, idx) => ({
+        ...s,
+        id: crypto.randomUUID(),
+        color: s.color || "#dc2626",
+        order: idx,
+        subItems: s.subItems || []
+      })) : [];
       items = template.items.map((it, idx) => ({ 
         ...it, 
         id: crypto.randomUUID(),
@@ -812,8 +1181,7 @@
       order = {};
       persist();
       render();
-      $("status").textContent = "Template loaded!";
-      setTimeout(() => $("status").textContent = "Saved locally", 1500);
+      showStatus("Template loaded!");
     }
   };
 
@@ -821,10 +1189,9 @@
     const text = $("receiptOut").value;
     try {
       await navigator.clipboard.writeText(text);
-      $("status").textContent = "Copied!";
-      setTimeout(() => $("status").textContent = "Saved locally", 900);
+      showStatus("Copied!", 900);
     } catch {
-      $("status").textContent = "Copy failed (select + ctrl/cmd+c)";
+      showStatus("Copy failed (select + ctrl/cmd+c)", 0);
     }
   };
 
@@ -844,6 +1211,13 @@
     
     const menuData = {
       groups: groups,
+      specials: specials.map(special => ({
+        name: special.name,
+        price: special.price,
+        color: special.color,
+        groupId: special.groupId || null,
+        subItems: special.subItems || []
+      })),
       items: items.map(item => ({ 
         name: item.name, 
         price: item.price, 
@@ -866,9 +1240,7 @@
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    
-    $("status").textContent = "Menu saved!";
-    setTimeout(() => $("status").textContent = "Saved locally", 1500);
+    showStatus("Menu saved!");
   };
 
   $("loadMenuBtn").onclick = () => {
@@ -901,6 +1273,20 @@
             groups = [];
           }
           
+          if (menuData.specials && Array.isArray(menuData.specials)) {
+            specials = menuData.specials.map((special, idx) => ({
+              id: crypto.randomUUID(),
+              name: special.name || "Unnamed Special",
+              price: Number(special.price) || 0,
+              color: special.color || "#dc2626",
+              groupId: special.groupId || null,
+              order: special.order ?? idx,
+              subItems: special.subItems || []
+            }));
+          } else {
+            specials = [];
+          }
+          
           items = menuData.items.map((item, idx) => ({
             id: crypto.randomUUID(),
             name: item.name || "Unnamed Item",
@@ -917,9 +1303,7 @@
           order = {};
           persist();
           render();
-          
-          $("status").textContent = "Menu loaded!";
-          setTimeout(() => $("status").textContent = "Saved locally", 1500);
+          showStatus("Menu loaded!");
         }
       } catch (error) {
         alert("Error loading menu file: " + error.message);
@@ -937,6 +1321,19 @@
   $("groupsHeader").onclick = () => {
     const content = $("groupsCollapsible");
     const icon = $("groupsHeader").querySelector(".collapse-icon");
+    if (content.style.display === "none") {
+      content.style.display = "block";
+      icon.textContent = "▼";
+    } else {
+      content.style.display = "none";
+      icon.textContent = "▶";
+    }
+  };
+
+  // Specials collapse toggle
+  $("specialsHeader").onclick = () => {
+    const content = $("specialsCollapsible");
+    const icon = $("specialsHeader").querySelector(".collapse-icon");
     if (content.style.display === "none") {
       content.style.display = "block";
       icon.textContent = "▼";

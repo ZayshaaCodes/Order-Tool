@@ -43,6 +43,24 @@
         </div>
 
         <div class="add-item-section">
+          <h3 class="collapsible-header" id="specialsHeader">
+            <span class="collapse-icon">▶</span> Specials
+          </h3>
+          <div id="specialsCollapsible" class="collapsible-content" style="display: none;">
+            <div class="add-item-form">
+              <input id="newSpecialName" placeholder="Special name" />
+              <input id="newSpecialPrice" type="number" placeholder="Price" step="0.01" />
+              <select id="newSpecialGroupSelect" style="flex: 1;">
+                <option value="">No Group</option>
+              </select>
+              <input id="newSpecialColor" type="color" value="#dc2626" class="color-picker" title="Special color" />
+              <button class="btn primary" id="addSpecialBtn">Add special</button>
+            </div>
+            <div id="specialsEditor" style="margin-top: 12px;"></div>
+          </div>
+        </div>
+
+        <div class="add-item-section">
           <h3>Add New Item</h3>
           <div class="add-item-form">
             <input id="newName" placeholder="Item name" />
@@ -151,6 +169,13 @@
           <input type="number" id="discountPct" min="0" step="0.01" value="0" style="width: 80px;" />
         </div>
         
+        <div class="control-group" style="margin-bottom: 8px;">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; min-width: auto;">
+            <input type="checkbox" id="showBreakdownInReceipt" style="width: auto; margin: 0;" />
+            <span style="font-size: 12px;">Include breakdown in receipt</span>
+          </label>
+        </div>
+        
         <div class="total-display">
           <span id="totalLine" class="total-amount"></span>
         </div>
@@ -159,6 +184,8 @@
         <div class="muted receipt-help">
           Output is plain text for easy paste into messages.
         </div>
+        
+        <div id="componentBreakdownWrap" style="margin-top: 12px;"></div>
       </div>
     </div>
   </div>

@@ -1,0 +1,14 @@
+/* Add this to styles.css for the special-wrapper */
+.special-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+
+.special-wrapper .item-row {
+  margin-bottom: 0;
+}
+
+.special-wrapper .sub-items-row {
+  margin-top: 0;
+}
