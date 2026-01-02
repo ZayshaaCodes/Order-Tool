@@ -127,18 +127,6 @@ h1 {
   gap: 8px;
 }
 
-/* Legacy row styles - kept for any remaining usage */
-.row { 
-  display: flex; 
-  gap: 8px; 
-  align-items: center; 
-  flex-wrap: wrap; 
-}
-
-.row > * { 
-  flex: 0 0 auto; 
-}
-
 .btn { 
   padding: 10px 12px; 
   border: 1px solid #444; 
@@ -281,10 +269,6 @@ th {
   background-color: #3a3a3a;
 }
 
-.spacer { 
-  flex: 1 1 auto; 
-}
-
 /* Color picker styles */
 .color-picker {
   width: 40px;
@@ -293,12 +277,6 @@ th {
   border-radius: 5px;
   cursor: pointer;
   padding: 0;
-}
-
-/* Loading state */
-.loading {
-  opacity: 0.6;
-  pointer-events: none;
 }
 
 /* Section Styles */
@@ -534,18 +512,6 @@ th {
   font-style: italic;
 }
 
-.sub-items-hint {
-  color: #666;
-  font-size: 11px;
-  font-style: italic;
-  margin-left: 78px;
-  margin-top: 2px;
-}
-
-.items-list h3 {
-  margin-bottom: 16px;
-}
-
 .control-group {
   display: flex;
   gap: 6px;
@@ -566,31 +532,6 @@ th {
 
 .template-select {
   min-width: 160px;
-}
-
-/* Order Settings */
-.order-settings {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: #333;
-  border-radius: 6px;
-}
-
-.setting-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.setting-row:last-child {
-  margin-bottom: 0;
-}
-
-.setting-row label {
-  color: #a0a0a0;
-  font-size: 13px;
-  min-width: 100px;
 }
 
 /* Menu Items Display */
@@ -757,59 +698,4 @@ th {
 }
 
 .receipt-help {
-  margin-top: 8px;
-}
-
-/* Share Code Styles */
-.share-code-section {
-  margin-top: 12px;
-  padding: 12px;
-  background: #3a3a3a;
-  border-radius: 6px;
-}
-
-.share-code-row {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.share-code-row label {
-  color: #a0a0a0;
-  font-size: 13px;
-  min-width: 80px;
-}
-
-.load-shared-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-top: 8px;
-}
-
-/* Help Text */
-.help-text {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #444;
-}
-
-.code-input {
-  font-family: 'Courier New', monospace;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  width: 120px;
-}
-
-.share-code {
-  font-family: 'Courier New', monospace;
-  font-size: 16px;
-  font-weight: bold;
-  color: #93c5fd;
-  background: #1e3a5f;
-  padding: 8px 12px;
-  border-radius: 5px;
-  border: 1px solid #2563eb;
 }
