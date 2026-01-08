@@ -57,6 +57,50 @@
         { name: "Sakura Latte", price: 50, color: "#2563eb", groupId: 2 }   
       ]
     },    
+    "L'espoir": {
+      title: "L'espoir Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Food" },
+        { id: 2, order: 2, name: "Drinks" },
+        { id: 3, order: 3, name: "Deserts" }
+      ],
+      specials: [
+      ],
+      items: [
+        { name: "Baguette", price: 50, color: "#16a34a", groupId: 1 },         
+        { name: "French Onion Soup", price: 150, color: "#16a34a", groupId: 1 },     
+        { name: "Fettuccine Alfredo", price: 120, color: "#16a34a", groupId: 1 },    
+        { name: "Ratatouille", price: 120, color: "#16a34a", groupId: 1 },         
+        { name: "Latte", price: 50, color: "#2563eb", groupId: 2 },
+        { name: "Orangina", price: 40, color: "#2563eb", groupId: 2 },    
+        { name: "Red Wine", price: 150, color: "#2563eb", groupId: 2 },         
+        { name: "Bavarois", price: 35, color: "#8825ebff", groupId: 3 },         
+        { name: "Chocolate Eclair", price: 35, color: "#8825ebff", groupId: 3 },         
+      ]
+    },  
+    "French Bakery": {
+      title: "French Bakery Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Food" },
+        { id: 2, order: 2, name: "Drinks" },
+        { id: 3, order: 3, name: "Deserts" }
+      ],
+      specials: [
+      ],
+      items: [
+        { name: "Baguette", price: 40, color: "#16a34a", groupId: 1 },         
+        { name: "Bavarois", price: 40, color: "#16a34a", groupId: 1 },     
+        { name: "Charlotte", price: 60, color: "#16a34a", groupId: 1 },    
+        { name: "Chocolate Eclair", price: 40, color: "#16a34a", groupId: 1 },         
+        { name: "Choux Pastry", price: 75, color: "#16a34a", groupId: 1 },
+        { name: "Stack of Donuts", price: 50, color: "#16a34a", groupId: 1 },    
+        { name: "Salad", price: 30, color: "#16a34a", groupId: 1 },    
+        { name: "Coke", price: 40, color: "#2563eb", groupId: 2 },    
+        { name: "Latte", price: 45, color: "#2563eb", groupId: 2 },    
+        { name: "Lemonate", price: 30, color: "#2563eb", groupId: 2 },    
+        { name: "Orange Smoothy", price: 50, color: "#2563eb", groupId: 2 },    
+      ]
+    },    
     "Dreamworks": {
       title: "Dreamworks Receipt",
       groups: [
