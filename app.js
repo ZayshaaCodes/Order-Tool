@@ -97,8 +97,8 @@
         { name: "Salad", price: 30, color: "#16a34a", groupId: 1 },    
         { name: "Coke", price: 40, color: "#2563eb", groupId: 2 },    
         { name: "Latte", price: 45, color: "#2563eb", groupId: 2 },    
-        { name: "Lemonate", price: 30, color: "#2563eb", groupId: 2 },    
-        { name: "Orange Smoothy", price: 50, color: "#2563eb", groupId: 2 },    
+        { name: "Lemonade", price: 30, color: "#2563eb", groupId: 2 },    
+        { name: "Orange Smoothie", price: 50, color: "#2563eb", groupId: 2 },    
       ]
     },    
     "Dreamworks": {
