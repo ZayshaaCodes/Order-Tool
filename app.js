@@ -86,6 +86,7 @@
         { id: 3, order: 3, name: "Deserts" }
       ],
       specials: [
+        { name: "Bacon Special", price: 400, color: "#dc2626", groupId: 1, subItems: ["5x Stack of Donuts", "5x Coke"] }
       ],
       items: [
         { name: "Baguette", price: 40, color: "#16a34a", groupId: 1 },         
