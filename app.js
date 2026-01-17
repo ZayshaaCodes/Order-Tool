@@ -124,6 +124,44 @@
         { name: "Adv. Repair Kit", price: 450, color: "#16a34a", groupId: 2 }, 
         { name: "Employee Max Upgrades", price: 10000, color: "#2563eb", groupId: 3 },
       ]
+    },
+    "Clicklovers": {
+      title: "Clicklovers Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Theft Tools" },
+        { id: 2, order: 2, name: "Electronics" },
+        { id: 3, order: 3, name: "Laptops" },
+        { id: 4, order: 4, name: "Accessories" }
+      ],
+      specials: [
+        { name: "Car Bomb", price: 75000, color: "#dc2626" }
+      ],
+      items: [
+        // Theft Tools
+        { name: "Screwdriver", price: 15, color: "#16a34a", groupId: 1 },
+        { name: "Drill", price: 350, color: "#16a34a", groupId: 1 },
+        { name: "Safe Cracking Kit", price: 1500, color: "#16a34a", groupId: 1 },
+        { name: "Electronics Kit", price: 3500, color: "#16a34a", groupId: 1 },
+        { name: "Hacking Device", price: 7500, color: "#16a34a", groupId: 1 },
+
+        // Electronics
+        { name: "Advanced Radio", price: 3000, color: "#2563eb", groupId: 2 },
+        { name: "Basic Radio", price: 1500, color: "#2563eb", groupId: 2 },
+        { name: "Camera", price: 500, color: "#2563eb", groupId: 2 },
+        { name: "Phone", price: 750, color: "#2563eb", groupId: 2 },
+        { name: "Smart Watch", price: 500, color: "#2563eb", groupId: 2 },
+        { name: "VPN", price: 4000, color: "#2563eb", groupId: 2 },
+
+        // Laptops
+        { name: "Green Laptop", price: 8000, color: "#8825ebff", groupId: 3 },
+        { name: "Red Laptop", price: 15000, color: "#8825ebff", groupId: 3 },
+        { name: "Gold Laptop", price: 25000, color: "#8825ebff", groupId: 3 },
+        { name: "Blue Laptop", price: 30000, color: "#8825ebff", groupId: 3 },
+
+        // Accessories
+        { name: "Card Holder", price: 100, color: "#f59e0b", groupId: 4 },
+        { name: "Duffle Bag", price: 1000, color: "#f59e0b", groupId: 4 }
+      ]
     }
   };
 
@@ -419,6 +457,16 @@
     `;
     const tbody = table.querySelector("tbody");
 
+    const onGroupMetaChange = () => {
+      // Do not call full render() here: it re-creates the groups table and
+      // causes the active input to lose focus while typing.
+      persist();
+      updateGroupSelects();
+      renderButtons();
+      renderEditor();
+      updateJsonTextbox();
+    };
+
     [...groups].sort((a, b) => a.order - b.order).forEach(group => {
       const tr = document.createElement("tr");
 
@@ -429,14 +477,17 @@
       orderIn.style.width = "60px";
       orderIn.oninput = () => {
         group.order = Number(orderIn.value || 0);
-        persist(); render();
+        onGroupMetaChange();
       };
       orderTd.appendChild(orderIn);
 
       const nameTd = document.createElement("td");
       const nameIn = document.createElement("input");
       nameIn.value = group.name;
-      nameIn.oninput = () => { group.name = nameIn.value; persist(); render(); };
+      nameIn.oninput = () => {
+        group.name = nameIn.value;
+        onGroupMetaChange();
+      };
       nameTd.appendChild(nameIn);
 
       const delTd = document.createElement("td");
