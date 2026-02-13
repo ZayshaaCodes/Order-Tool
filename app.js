@@ -452,8 +452,8 @@
       b.style.borderColor = item.color || (isSpecial ? "#dc2626" : "#6b7280");
       b.style.color = "#ffffff";
       b.onclick = (e) => {
-        if (e.ctrlKey || e.metaKey) {
-          // Ctrl/Cmd+click: +5
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+          // Ctrl/Cmd/Shift+click: +5
           order[item.id] = (order[item.id] || 0) + 5;
           persist();
           render();
@@ -463,8 +463,8 @@
       };
       b.oncontextmenu = (e) => {
         e.preventDefault();
-        if (e.ctrlKey || e.metaKey) {
-          // Ctrl+right-click: -5
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+          // Ctrl/Shift+right-click: -5
           if (order[item.id] && order[item.id] > 0) {
             setQty(item.id, Math.max(0, order[item.id] - 5));
           }
