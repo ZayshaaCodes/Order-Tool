@@ -133,24 +133,34 @@
     <div class="ordering-grid">
       <div class="panel order-panel">
         <div class="panel-header">
-          <h2>Place Order</h2>
+          <h2>Place Order <button class="tips-toggle" id="tipsToggle" title="Tips">?</button></h2>
+          <span class="template-badge" id="templateBadge"></span>
           <div class="panel-actions">
             <button class="btn last-order" id="lastOrderBtn" title="Repeat last order" style="display:none;">↩ Last order</button>
             <button class="btn danger" id="clearOrderBtn">Clear order</button>
           </div>
         </div>
 
+        <div class="tips-drawer" id="tipsDrawer">
+          <div class="tips-columns">
+            <div class="tips-col">
+              <h4>🖱️ Mouse</h4>
+              <div class="tip-row"><kbd>Click</kbd> <span>+1</span></div>
+              <div class="tip-row"><kbd>Shift + Click</kbd> <span>+5</span></div>
+              <div class="tip-row"><kbd>Right-click</kbd> <span>−1</span></div>
+              <div class="tip-row"><kbd>Shift + Right</kbd> <span>−5</span></div>
+            </div>
+            <div class="tips-col">
+              <h4>⌨️ Keys</h4>
+              <div class="tip-row"><kbd>Esc</kbd> <span>Clear order</span></div>
+              <div class="tip-row"><kbd>Ctrl+Shift+C</kbd> <span>Copy receipt</span></div>
+              <div class="tip-row"><kbd>Ctrl+Shift+L</kbd> <span>Last order</span></div>
+            </div>
+          </div>
+        </div>
+
         <div class="menu-items">
-          <div class="search-bar-wrap" id="searchWrap">
-            <span class="search-icon">🔍</span>
-            <input type="text" class="search-bar" id="searchBar" placeholder="Search menu items..." autocomplete="off" />
-            <button class="search-clear" id="searchClear">&times;</button>
-          </div>
           <div id="itemButtons" class="item-buttons"></div>
-          <div id="noResults" class="no-results" style="display:none;">
-            <span class="no-results-icon">🔎</span>
-            No items match your search.
-          </div>
         </div>
 
         <div class="current-order">
@@ -195,23 +205,6 @@
         
         <div id="componentBreakdownWrap" style="margin-top: 12px;"></div>
       </div>
-    </div>
-  </div>
-
-  <!-- Keyboard Shortcuts Help -->
-  <div class="shortcuts-help">
-    <button class="shortcuts-btn" id="shortcutsBtn" title="Keyboard shortcuts">?</button>
-    <div class="shortcuts-popup" id="shortcutsPopup">
-      <h4>🖱️ Button Controls</h4>
-      <div class="shortcut-row"><span>Add 1</span><span class="shortcut-key">Click</span></div>
-      <div class="shortcut-row"><span>Add 5</span><span class="shortcut-key">Shift+Click</span></div>
-      <div class="shortcut-row"><span>Remove 1</span><span class="shortcut-key">Right-click</span></div>
-      <div class="shortcut-row"><span>Remove 5</span><span class="shortcut-key">Shift+Right</span></div>
-      <h4 style="margin-top: 10px;">⌨️ Keyboard</h4>
-      <div class="shortcut-row"><span>Clear order</span><span class="shortcut-key">Esc</span></div>
-      <div class="shortcut-row"><span>Focus search</span><span class="shortcut-key">/</span></div>
-      <div class="shortcut-row"><span>Copy receipt</span><span class="shortcut-key">Ctrl+Shift+C</span></div>
-      <div class="shortcut-row"><span>Repeat last order</span><span class="shortcut-key">Ctrl+Shift+L</span></div>
     </div>
   </div>
 

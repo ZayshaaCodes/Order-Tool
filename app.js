@@ -432,8 +432,7 @@
     const wrap = $("itemButtons");
     wrap.innerHTML = "";
     
-    const searchTerm = ($("searchBar") ? $("searchBar").value : "").toLowerCase().trim();
-    const noResults = $("noResults");
+    const searchTerm = "";
     let totalVisible = 0;
     
     // Helper: create a menu button with emoji + badge
@@ -584,11 +583,6 @@
       }
       
       wrap.appendChild(specialsContainer);
-    }
-    
-    // Show/hide no results message
-    if (noResults) {
-      noResults.style.display = (searchTerm && totalVisible === 0) ? "block" : "none";
     }
   }
 
@@ -1313,6 +1307,7 @@
         order = {};
         persist();
         render();
+        setLoadedTemplate("Custom");
         showStatus("Menu loaded from JSON!");
       }
 
@@ -1424,6 +1419,7 @@
       order = {};
       persist();
       render();
+      setLoadedTemplate(selectedTemplate);
     }
   };
 
@@ -1470,6 +1466,7 @@
       $("templateNameInput").value = "";
       persist();
       render();
+      setLoadedTemplate(templateName);
       showStatus("Template loaded!");
     }
   };
@@ -1602,6 +1599,7 @@
           order = {};
           persist();
           render();
+          setLoadedTemplate("Custom");
           showStatus("Menu loaded!");
         }
       } catch (error) {
@@ -1672,27 +1670,28 @@
   render();
   updateLastOrderButton();
 
-  // === SEARCH BAR ===
-  const searchBar = $("searchBar");
-  const searchClear = $("searchClear");
-  const searchWrap = $("searchWrap");
-  
-  if (searchBar) {
-    searchBar.oninput = () => {
-      const hasValue = searchBar.value.trim().length > 0;
-      searchWrap.classList.toggle("has-value", hasValue);
-      renderButtons();
+  // === TIPS DRAWER ===
+  const tipsToggle = $("tipsToggle");
+  const tipsDrawer = $("tipsDrawer");
+  if (tipsToggle && tipsDrawer) {
+    tipsToggle.onclick = () => {
+      tipsDrawer.classList.toggle("open");
+      tipsToggle.classList.toggle("open");
     };
   }
-  
-  if (searchClear) {
-    searchClear.onclick = () => {
-      searchBar.value = "";
-      searchWrap.classList.remove("has-value");
-      renderButtons();
-      searchBar.focus();
-    };
+
+  // === TEMPLATE BADGE ===
+  function updateTemplateBadge() {
+    const badge = $("templateBadge");
+    if (!badge) return;
+    const name = localStorage.getItem("sop_loaded_template") || "";
+    badge.textContent = name;
   }
+  function setLoadedTemplate(name) {
+    localStorage.setItem("sop_loaded_template", name);
+    updateTemplateBadge();
+  }
+  updateTemplateBadge();
 
   // === LAST ORDER RECALL ===
   if ($("lastOrderBtn")) {
@@ -1721,29 +1720,13 @@
     const activeTag = document.activeElement?.tagName;
     const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT";
     
-    // Esc: clear search or clear order
-    if (e.key === "Escape") {
-      if (searchBar && searchBar.value.trim()) {
-        searchBar.value = "";
-        searchWrap.classList.remove("has-value");
-        renderButtons();
-        searchBar.blur();
-        return;
-      }
-      if (!isTyping && Object.keys(order).length > 0) {
-        saveLastOrder();
-        order = {};
-        persist();
-        render();
-        updateLastOrderButton();
-      }
-      return;
-    }
-    
-    // / : focus search (when not typing)
-    if (e.key === "/" && !isTyping) {
-      e.preventDefault();
-      if (searchBar) searchBar.focus();
+    // Esc: clear order
+    if (e.key === "Escape" && !isTyping && Object.keys(order).length > 0) {
+      saveLastOrder();
+      order = {};
+      persist();
+      render();
+      updateLastOrderButton();
       return;
     }
     
@@ -1766,21 +1749,4 @@
       return;
     }
   });
-
-  // === SHORTCUTS POPUP ===
-  const shortcutsBtn = $("shortcutsBtn");
-  const shortcutsPopup = $("shortcutsPopup");
-  
-  if (shortcutsBtn && shortcutsPopup) {
-    shortcutsBtn.onclick = (e) => {
-      e.stopPropagation();
-      shortcutsPopup.classList.toggle("open");
-    };
-    
-    document.addEventListener("click", (e) => {
-      if (!shortcutsPopup.contains(e.target) && e.target !== shortcutsBtn) {
-        shortcutsPopup.classList.remove("open");
-      }
-    });
-  }
 })();
