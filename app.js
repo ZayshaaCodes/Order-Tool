@@ -451,7 +451,31 @@
       b.style.backgroundColor = item.color || (isSpecial ? "#dc2626" : "#6b7280");
       b.style.borderColor = item.color || (isSpecial ? "#dc2626" : "#6b7280");
       b.style.color = "#ffffff";
-      b.onclick = () => addToOrder(item.id);
+      b.onclick = (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          // Ctrl/Cmd+click: +5
+          order[item.id] = (order[item.id] || 0) + 5;
+          persist();
+          render();
+        } else {
+          addToOrder(item.id);
+        }
+      };
+      b.oncontextmenu = (e) => {
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) {
+          // Ctrl+right-click: -5
+          if (order[item.id] && order[item.id] > 0) {
+            setQty(item.id, Math.max(0, order[item.id] - 5));
+          }
+        } else {
+          // Right-click: -1
+          if (order[item.id] && order[item.id] > 0) {
+            setQty(item.id, order[item.id] - 1);
+          }
+        }
+      };
+      b.title = "Click: +1 | Ctrl+Click: +5 | Right-click: -1 | Ctrl+Right-click: -5";
       
       wrapper.appendChild(b);
       
