@@ -41,6 +41,40 @@ h1 {
   align-items: center;
 }
 
+.header-template-select {
+  padding: 6px 10px;
+  font-size: 13px;
+  min-width: 130px;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 8px;
+  color: #e0e0e0;
+}
+
+.header-divider {
+  width: 1px;
+  height: 24px;
+  background: #444;
+  margin: 0 2px;
+}
+
+.template-name-input {
+  width: 110px;
+  padding: 6px 10px !important;
+  font-size: 12px;
+  background: #1a1a1a !important;
+  border: 1px solid #333 !important;
+  border-radius: 8px !important;
+  color: #888;
+  transition: all 0.2s;
+}
+
+.template-name-input:focus {
+  border-color: #2563eb !important;
+  color: #e0e0e0;
+  width: 140px;
+}
+
 .tab-btn {
   background: #2d2d2d;
   border: 2px solid #444;
@@ -712,4 +746,291 @@ th {
 }
 
 .receipt-help {
+}
+
+/* ===== UX ENHANCEMENTS ===== */
+
+/* Search/Filter Bar */
+.search-bar-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 10px 12px 10px 36px !important;
+  background: #1a1a1a !important;
+  border: 1px solid #444 !important;
+  border-radius: 10px !important;
+  color: #e0e0e0;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-bar:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+.search-bar::placeholder {
+  color: #666;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: none;
+}
+
+.search-clear:hover {
+  color: #fff;
+  background: #444;
+}
+
+.search-bar-wrap.has-value .search-clear {
+  display: block;
+}
+
+/* Quantity Badges on Menu Buttons */
+.menu-btn-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.qty-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  z-index: 2;
+  pointer-events: none;
+  animation: badgePop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 2px solid #2d2d2d;
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+
+/* Emoji on buttons */
+.btn-emoji {
+  margin-right: 4px;
+  font-size: 16px;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
+
+/* Add-to-cart pulse animation */
+@keyframes addPulse {
+  0% { transform: scale(1); box-shadow: 0 1px 1px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); }
+  50% { transform: scale(1.08); box-shadow: 0 0 20px rgba(255, 255, 255, 0.2), 0 1px 1px rgba(0,0,0,0.6); }
+  100% { transform: scale(1); box-shadow: 0 1px 1px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); }
+}
+
+.btn-add-pulse {
+  animation: addPulse 0.3s ease;
+}
+
+/* Sticky Total Bar */
+.sticky-total {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: linear-gradient(135deg, #1e3a5f 0%, #1a2d47 100%);
+  margin: -12px -12px 12px -12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(37, 99, 235, 0.3);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sticky-total .total-amount {
+  font-size: 15px;
+}
+
+/* Uniform Button Grid */
+.item-group-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.item-group-buttons .btn,
+.item-group-buttons .menu-btn-wrap {
+  width: 100%;
+}
+
+.item-group-buttons .menu-btn-wrap .btn {
+  width: 100%;
+  text-align: center;
+}
+
+/* Smooth Order Table Row Animations */
+@keyframes rowSlideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes rowFadeOut {
+  from { opacity: 1; max-height: 60px; }
+  to   { opacity: 0; max-height: 0; padding: 0; }
+}
+
+.order-table-row {
+  animation: rowSlideIn 0.25s ease;
+}
+
+/* Keyboard Shortcuts Help */
+.shortcuts-help {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 100;
+}
+
+.shortcuts-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  border: 1px solid #555;
+  color: #a0a0a0;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.shortcuts-btn:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.shortcuts-popup {
+  display: none;
+  position: absolute;
+  bottom: 44px;
+  left: 0;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 240px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: toastIn 0.2s ease;
+}
+
+.shortcuts-popup.open {
+  display: block;
+}
+
+.shortcuts-popup h4 {
+  margin: 0 0 8px;
+  color: #93c5fd;
+  font-size: 13px;
+}
+
+.shortcut-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 12px;
+  color: #a0a0a0;
+}
+
+.shortcut-key {
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #e0e0e0;
+}
+
+/* Last Order Button */
+.btn.last-order {
+  background: #2d1e5f;
+  border-color: #7c3aed;
+  color: #c4b5fd;
+}
+
+.btn.last-order:hover {
+  background: #7c3aed;
+  color: #fff;
+}
+
+/* Emoji picker inline input */
+.emoji-input {
+  width: 40px !important;
+  text-align: center;
+  font-size: 18px;
+  padding: 4px !important;
+  flex: 0 0 40px;
+}
+
+/* No results state */
+.no-results {
+  text-align: center;
+  padding: 24px 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.no-results-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  display: block;
+  opacity: 0.5;
+}
+
+/* Hidden group for search filtering */
+.group-hidden {
+  display: none;
+}
+
+/* Item highlight when filtered */
+.menu-btn-wrap .btn.search-match {
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.4), 0 1px 1px rgba(0,0,0,0.6);
 }

@@ -25,8 +25,26 @@
   };
   
   const showStatus = (message, duration = 1500) => {
-    $("status").textContent = message;
-    if (duration) setTimeout(() => $("status").textContent = "Saved locally", duration);
+    const el = $("status");
+    if (!el) return;
+    el.textContent = message;
+    if (duration) setTimeout(() => { if (el) el.textContent = "Saved locally"; }, duration);
+  };
+
+  // Last order management
+  const saveLastOrder = () => {
+    if (Object.keys(order).length > 0) {
+      save("sop_last_order_v1", { ...order });
+    }
+  };
+
+  const getLastOrder = () => load("sop_last_order_v1", null);
+
+  const updateLastOrderButton = () => {
+    const btn = $("lastOrderBtn");
+    if (!btn) return;
+    const last = getLastOrder();
+    btn.style.display = (last && Object.keys(last).length > 0) ? '' : 'none';
   };
 
   const menuTemplates = {
@@ -44,17 +62,17 @@
         { name: "Good 4 The Soul", price: 350, color: "#dc2626", groupId: 1, subItems: ["1x Pad Thai", "1x Tuna Roll", "Drink Of Choice"] }
       ],
       items: [
-        { name: "Guku", price: 100, color: "#16a34a", groupId: 1 },         
-        { name: "Pad Thai", price: 200, color: "#16a34a", groupId: 1 },     
-        { name: "Cali Maki", price: 100, color: "#16a34a", groupId: 1 },    
-        { name: "Salad", price: 80, color: "#16a34a", groupId: 1 },         
-        { name: "Sashimi Roll", price: 120, color: "#16a34a", groupId: 1 }, 
-        { name: "Tuna Roll", price: 140, color: "#16a34a", groupId: 1 },    
-        { name: "Chips", price: 100, color: "#16a34a", groupId: 1 },    
-        { name: "Japanese Pan Noodles", price: 100, color: "#16a34a", groupId: 1 },  
-        { name: "Matcha Tea", price: 80, color: "#2563eb", groupId: 2 },    
-        { name: "Sake", price: 100, color: "#2563eb", groupId: 2 },         
-        { name: "Sakura Latte", price: 50, color: "#2563eb", groupId: 2 }   
+        { name: "Guku", price: 100, color: "#16a34a", groupId: 1, emoji: "🍛" },         
+        { name: "Pad Thai", price: 200, color: "#16a34a", groupId: 1, emoji: "🍜" },     
+        { name: "Cali Maki", price: 100, color: "#16a34a", groupId: 1, emoji: "🍣" },    
+        { name: "Salad", price: 80, color: "#16a34a", groupId: 1, emoji: "🥗" },         
+        { name: "Sashimi Roll", price: 120, color: "#16a34a", groupId: 1, emoji: "🍣" }, 
+        { name: "Tuna Roll", price: 140, color: "#16a34a", groupId: 1, emoji: "🌣" },    
+        { name: "Chips", price: 100, color: "#16a34a", groupId: 1, emoji: "🍟" },    
+        { name: "Japanese Pan Noodles", price: 100, color: "#16a34a", groupId: 1, emoji: "🍜" },  
+        { name: "Matcha Tea", price: 80, color: "#2563eb", groupId: 2, emoji: "🍵" },    
+        { name: "Sake", price: 100, color: "#2563eb", groupId: 2, emoji: "🍶" },         
+        { name: "Sakura Latte", price: 50, color: "#2563eb", groupId: 2, emoji: "☕" }   
       ]
     },    
     "L'espoir": {
@@ -67,15 +85,15 @@
       specials: [
       ],
       items: [
-        { name: "Baguette", price: 50, color: "#16a34a", groupId: 1 },         
-        { name: "French Onion Soup", price: 150, color: "#16a34a", groupId: 1 },     
-        { name: "Fettuccine Alfredo", price: 120, color: "#16a34a", groupId: 1 },    
-        { name: "Ratatouille", price: 120, color: "#16a34a", groupId: 1 },         
-        { name: "Latte", price: 50, color: "#2563eb", groupId: 2 },
-        { name: "Orangina", price: 40, color: "#2563eb", groupId: 2 },    
-        { name: "Red Wine", price: 150, color: "#2563eb", groupId: 2 },         
-        { name: "Bavarois", price: 35, color: "#8825ebff", groupId: 3 },         
-        { name: "Chocolate Eclair", price: 35, color: "#8825ebff", groupId: 3 },         
+        { name: "Baguette", price: 50, color: "#16a34a", groupId: 1, emoji: "🥖" },         
+        { name: "French Onion Soup", price: 150, color: "#16a34a", groupId: 1, emoji: "🍲" },     
+        { name: "Fettuccine Alfredo", price: 120, color: "#16a34a", groupId: 1, emoji: "🍝" },    
+        { name: "Ratatouille", price: 120, color: "#16a34a", groupId: 1, emoji: "🥘" },         
+        { name: "Latte", price: 50, color: "#2563eb", groupId: 2, emoji: "☕" },
+        { name: "Orangina", price: 40, color: "#2563eb", groupId: 2, emoji: "🍊" },    
+        { name: "Red Wine", price: 150, color: "#2563eb", groupId: 2, emoji: "🍷" },         
+        { name: "Bavarois", price: 35, color: "#8825ebff", groupId: 3, emoji: "🍮" },         
+        { name: "Chocolate Eclair", price: 35, color: "#8825ebff", groupId: 3, emoji: "🍫" },         
       ]
     },  
     "French Bakery": {
@@ -89,17 +107,17 @@
         { name: "Bacon Special", price: 400, color: "#dc2626", groupId: 1, subItems: ["5x Stack of Donuts", "5x Coke"] }
       ],
       items: [
-        { name: "Baguette", price: 40, color: "#16a34a", groupId: 1 },         
-        { name: "Bavarois", price: 40, color: "#16a34a", groupId: 1 },     
-        { name: "Charlotte", price: 60, color: "#16a34a", groupId: 1 },    
-        { name: "Chocolate Eclair", price: 40, color: "#16a34a", groupId: 1 },         
-        { name: "Choux Pastry", price: 75, color: "#16a34a", groupId: 1 },
-        { name: "Stack of Donuts", price: 50, color: "#16a34a", groupId: 1 },    
-        { name: "Salad", price: 30, color: "#16a34a", groupId: 1 },    
-        { name: "Coke", price: 40, color: "#2563eb", groupId: 2 },    
-        { name: "Latte", price: 45, color: "#2563eb", groupId: 2 },    
-        { name: "Lemonade", price: 30, color: "#2563eb", groupId: 2 },    
-        { name: "Orange Smoothie", price: 50, color: "#2563eb", groupId: 2 },    
+        { name: "Baguette", price: 40, color: "#16a34a", groupId: 1, emoji: "🥖" },         
+        { name: "Bavarois", price: 40, color: "#16a34a", groupId: 1, emoji: "🍮" },     
+        { name: "Charlotte", price: 60, color: "#16a34a", groupId: 1, emoji: "🎂" },    
+        { name: "Chocolate Eclair", price: 40, color: "#16a34a", groupId: 1, emoji: "🍫" },         
+        { name: "Choux Pastry", price: 75, color: "#16a34a", groupId: 1, emoji: "🥐" },
+        { name: "Stack of Donuts", price: 50, color: "#16a34a", groupId: 1, emoji: "🍩" },    
+        { name: "Salad", price: 30, color: "#16a34a", groupId: 1, emoji: "🥗" },    
+        { name: "Coke", price: 40, color: "#2563eb", groupId: 2, emoji: "🥤" },    
+        { name: "Latte", price: 45, color: "#2563eb", groupId: 2, emoji: "☕" },    
+        { name: "Lemonade", price: 30, color: "#2563eb", groupId: 2, emoji: "🍋" },    
+        { name: "Orange Smoothie", price: 50, color: "#2563eb", groupId: 2, emoji: "🍊" },    
       ]
     },    
     "Dreamworks": {
@@ -113,16 +131,16 @@
         { name: "Full Service Package", price: 15000, color: "#dc2626", groupId: 1 }
       ],
       items: [
-        { name: "Body Repair", price: 75, color: "#16a34a", groupId: 1 },         
-        { name: "Internals", price: 800, color: "#16a34a", groupId: 1 },     
-        { name: "HG Internals", price: 1200, color: "#16a34a", groupId: 1 },    
-        { name: "Upgrade", price: 2500, color: "#16a34a", groupId: 1 },    
-        { name: "Turbo", price: 5000, color: "#16a34a", groupId: 1 },  
-        { name: "Max Upgrade", price: 14000, color: "#16a34a", groupId: 1 },
-        { name: "Lockpick", price: 25, color: "#16a34a", groupId: 2 },         
-        { name: "Repair Kit", price: 150, color: "#16a34a", groupId: 2 }, 
-        { name: "Adv. Repair Kit", price: 450, color: "#16a34a", groupId: 2 }, 
-        { name: "Employee Max Upgrades", price: 10000, color: "#2563eb", groupId: 3 },
+        { name: "Body Repair", price: 75, color: "#16a34a", groupId: 1, emoji: "🔧" },         
+        { name: "Internals", price: 800, color: "#16a34a", groupId: 1, emoji: "⚙️" },     
+        { name: "HG Internals", price: 1200, color: "#16a34a", groupId: 1, emoji: "🔩" },    
+        { name: "Upgrade", price: 2500, color: "#16a34a", groupId: 1, emoji: "⬆️" },    
+        { name: "Turbo", price: 5000, color: "#16a34a", groupId: 1, emoji: "🚀" },  
+        { name: "Max Upgrade", price: 14000, color: "#16a34a", groupId: 1, emoji: "💎" },
+        { name: "Lockpick", price: 25, color: "#16a34a", groupId: 2, emoji: "🔑" },         
+        { name: "Repair Kit", price: 150, color: "#16a34a", groupId: 2, emoji: "🧰" }, 
+        { name: "Adv. Repair Kit", price: 450, color: "#16a34a", groupId: 2, emoji: "🛠️" }, 
+        { name: "Employee Max Upgrades", price: 10000, color: "#2563eb", groupId: 3, emoji: "👨‍🔧" },
       ]
     },
     "Clicklovers": {
@@ -138,29 +156,56 @@
       ],
       items: [
         // Theft Tools
-        { name: "Screwdriver", price: 15, color: "#16a34a", groupId: 1 },
-        { name: "Drill", price: 350, color: "#16a34a", groupId: 1 },
-        { name: "Safe Cracking Kit", price: 1500, color: "#16a34a", groupId: 1 },
-        { name: "Electronics Kit", price: 3500, color: "#16a34a", groupId: 1 },
-        { name: "Hacking Device", price: 7500, color: "#16a34a", groupId: 1 },
+        { name: "Screwdriver", price: 15, color: "#16a34a", groupId: 1, emoji: "🪛" },
+        { name: "Drill", price: 350, color: "#16a34a", groupId: 1, emoji: "🔩" },
+        { name: "Safe Cracking Kit", price: 1500, color: "#16a34a", groupId: 1, emoji: "🔐" },
+        { name: "Electronics Kit", price: 3500, color: "#16a34a", groupId: 1, emoji: "🔌" },
+        { name: "Hacking Device", price: 7500, color: "#16a34a", groupId: 1, emoji: "💻" },
 
         // Electronics
-        { name: "Advanced Radio", price: 3000, color: "#2563eb", groupId: 2 },
-        { name: "Basic Radio", price: 1500, color: "#2563eb", groupId: 2 },
-        { name: "Camera", price: 500, color: "#2563eb", groupId: 2 },
-        { name: "Phone", price: 750, color: "#2563eb", groupId: 2 },
-        { name: "Smart Watch", price: 500, color: "#2563eb", groupId: 2 },
-        { name: "VPN", price: 4000, color: "#2563eb", groupId: 2 },
+        { name: "Advanced Radio", price: 3000, color: "#2563eb", groupId: 2, emoji: "📻" },
+        { name: "Basic Radio", price: 1500, color: "#2563eb", groupId: 2, emoji: "📡" },
+        { name: "Camera", price: 500, color: "#2563eb", groupId: 2, emoji: "📷" },
+        { name: "Phone", price: 750, color: "#2563eb", groupId: 2, emoji: "📱" },
+        { name: "Smart Watch", price: 500, color: "#2563eb", groupId: 2, emoji: "⌚" },
+        { name: "VPN", price: 4000, color: "#2563eb", groupId: 2, emoji: "🔒" },
 
         // Laptops
-        { name: "Green Laptop", price: 8000, color: "#8825ebff", groupId: 3 },
-        { name: "Red Laptop", price: 15000, color: "#8825ebff", groupId: 3 },
-        { name: "Gold Laptop", price: 25000, color: "#8825ebff", groupId: 3 },
-        { name: "Blue Laptop", price: 30000, color: "#8825ebff", groupId: 3 },
+        { name: "Green Laptop", price: 8000, color: "#8825ebff", groupId: 3, emoji: "💻" },
+        { name: "Red Laptop", price: 15000, color: "#8825ebff", groupId: 3, emoji: "💻" },
+        { name: "Gold Laptop", price: 25000, color: "#8825ebff", groupId: 3, emoji: "💻" },
+        { name: "Blue Laptop", price: 30000, color: "#8825ebff", groupId: 3, emoji: "💻" },
 
         // Accessories
-        { name: "Card Holder", price: 100, color: "#f59e0b", groupId: 4 },
-        { name: "Duffle Bag", price: 1000, color: "#f59e0b", groupId: 4 }
+        { name: "Card Holder", price: 100, color: "#f59e0b", groupId: 4, emoji: "💳" },
+        { name: "Duffle Bag", price: 1000, color: "#f59e0b", groupId: 4, emoji: "👜" }
+      ]
+    },
+    "Materials": {
+      title: "Materials Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Base Materials" }
+      ],
+      specials: [
+        { name: "100 x Plastic", price: 400, color: "#dc2626", groupId: 1, subItems: ["100x Plastic"] },
+        { name: "100 x Rubber", price: 100, color: "#dc2626", groupId: 1, subItems: ["100x Rubber"] },
+        { name: "100 x Iron Bars", price: 400, color: "#dc2626", groupId: 1, subItems: ["100x Iron Bars"] },
+        { name: "100 x Copper Wire", price: 200, color: "#dc2626", groupId: 1, subItems: ["100x Copper Wire"] },
+        { name: "100 x Heavy Duty Glue", price: 100, color: "#dc2626", groupId: 1, subItems: ["100x Heavy Duty Glue"] },
+        { name: "100 x Glue", price: 100, color: "#dc2626", groupId: 1, subItems: ["100x Glue"] },
+        { name: "100 x Electronic Parts", price: 100, color: "#dc2626", groupId: 1, subItems: ["100x Electronic Parts"] },
+        { name: "100 x Scrap Metal", price: 400, color: "#dc2626", groupId: 1, subItems: ["100x Scrap Metal"] }
+      ],
+      items: [
+        // Base individual materials for breakdown reference
+        { name: "Plastic", price: 4, color: "#16a34a", groupId: 1, emoji: "🪣" },
+        { name: "Rubber", price: 1, color: "#16a34a", groupId: 1, emoji: "⚫" },
+        { name: "Iron Bars", price: 4, color: "#16a34a", groupId: 1, emoji: "🧱" },
+        { name: "Copper Wire", price: 2, color: "#16a34a", groupId: 1, emoji: "🪭" },
+        { name: "Heavy Duty Glue", price: 1, color: "#16a34a", groupId: 1, emoji: "🪥" },
+        { name: "Glue", price: 1, color: "#16a34a", groupId: 1, emoji: "🪥" },
+        { name: "Electronic Parts", price: 1, color: "#16a34a", groupId: 1, emoji: "⚡" },
+        { name: "Scrap Metal", price: 4, color: "#16a34a", groupId: 1, emoji: "🔩" }
       ]
     }
   };
@@ -170,6 +215,7 @@
     ...item,
     id: crypto.randomUUID(),
     color: item.color || "#6b7280",
+    emoji: item.emoji || "",
     groupId: item.groupId || null,
     order: index
   }));
@@ -202,6 +248,8 @@
   $("discountPct").value = discountPct;
   $("receiptTitle").value = title;
 
+  const hiddenTemplates = new Set(["Materials"]);
+
   populateTemplateDropdown();
 
   function populateTemplateDropdown() {
@@ -209,15 +257,16 @@
     select.innerHTML = "";
     
     Object.keys(menuTemplates).forEach(templateName => {
+      if (hiddenTemplates.has(templateName)) return;
       const option = document.createElement("option");
       option.value = templateName;
       option.textContent = templateName;
       select.appendChild(option);
     });
     
-    // Set default to first template
+    // Set default to first visible template
     if (select.options.length > 0) {
-      select.value = Object.keys(menuTemplates)[0];
+      select.value = select.options[0].value;
     }
   }
 
@@ -233,6 +282,18 @@
     order[id] = (order[id] || 0) + 1;
     persist();
     render();
+    // Toast + animation
+    const it = getItem(id);
+    if (it) {
+    }
+    // Pulse the button
+    const btnEl = document.querySelector(`[data-item-id="${id}"] .btn, [data-item-id="${id}"]`);
+    if (btnEl) {
+      btnEl.classList.remove('btn-add-pulse');
+      void btnEl.offsetWidth; // force reflow
+      btnEl.classList.add('btn-add-pulse');
+      setTimeout(() => btnEl.classList.remove('btn-add-pulse'), 300);
+    }
   }
 
   function setQty(id, qty) {
@@ -249,7 +310,8 @@
     save("sop_order_v1", order);
     save("sop_discount_v1", Number($("discountPct").value || 0));
     save("sop_title_v1", $("receiptTitle").value || "Receipt");
-    $("status").textContent = "Saved locally";
+    const statusEl = $("status");
+    if (statusEl) statusEl.textContent = "Saved locally";
   }
 
   function calc() {
@@ -357,9 +419,65 @@
     return body.join("\n");
   }
 
+  function shorthandReceiptText() {
+    const { lines, subtotal, discount, total } = calc();
+    if (!lines.length) return "(no items)";
+    const parts = lines.map(l => l.qty > 1 ? `${l.qty}x ${l.name}` : l.name);
+    const discPct = Number($("discountPct").value || 0);
+    const totalStr = discPct > 0 ? `Total: $${money(total)} (was $${money(subtotal)})` : `Total: $${money(total)}`;
+    return parts.join(", ") + " | " + totalStr;
+  }
+
   function renderButtons() {
     const wrap = $("itemButtons");
     wrap.innerHTML = "";
+    
+    const searchTerm = ($("searchBar") ? $("searchBar").value : "").toLowerCase().trim();
+    const noResults = $("noResults");
+    let totalVisible = 0;
+    
+    // Helper: create a menu button with emoji + badge
+    const createMenuBtn = (item, isSpecial) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "menu-btn-wrap";
+      wrapper.dataset.itemId = item.id;
+      
+      const b = document.createElement("button");
+      b.className = "btn" + (isSpecial ? " special-btn" : "");
+      
+      const emojiSpan = item.emoji ? `<span class="btn-emoji">${item.emoji}</span>` : '';
+      b.innerHTML = `${emojiSpan}${item.name} ($${money(item.price)})`;
+      
+      b.style.backgroundColor = item.color || (isSpecial ? "#dc2626" : "#6b7280");
+      b.style.borderColor = item.color || (isSpecial ? "#dc2626" : "#6b7280");
+      b.style.color = "#ffffff";
+      b.onclick = () => addToOrder(item.id);
+      
+      wrapper.appendChild(b);
+      
+      // Quantity badge
+      const qty = order[item.id];
+      if (qty && qty > 0) {
+        const badge = document.createElement("span");
+        badge.className = "qty-badge";
+        badge.textContent = qty;
+        wrapper.appendChild(badge);
+      }
+      
+      // Search filtering
+      if (searchTerm) {
+        const nameMatch = item.name.toLowerCase().includes(searchTerm);
+        if (!nameMatch) {
+          wrapper.style.display = "none";
+        } else {
+          totalVisible++;
+        }
+      } else {
+        totalVisible++;
+      }
+      
+      return wrapper;
+    };
     
     // Sort groups by order
     const sortedGroups = [...groups].sort((a, b) => a.order - b.order);
@@ -377,16 +495,18 @@
       const groupContainer = document.createElement("div");
       groupContainer.className = "item-group-buttons";
       
+      let groupVisible = 0;
       groupItems.forEach(it => {
-        const b = document.createElement("button");
-        b.className = "btn";
-        b.textContent = `${it.name} ($${money(it.price)})`;
-        b.style.backgroundColor = it.color || "#6b7280";
-        b.style.borderColor = it.color || "#6b7280";
-        b.style.color = "#ffffff";
-        b.onclick = () => addToOrder(it.id);
-        groupContainer.appendChild(b);
+        const btn = createMenuBtn(it, false);
+        if (btn.style.display !== "none") groupVisible++;
+        groupContainer.appendChild(btn);
       });
+      
+      // Hide group header when all items are filtered out
+      if (searchTerm && groupVisible === 0) {
+        groupHeader.classList.add("group-hidden");
+        groupContainer.classList.add("group-hidden");
+      }
       
       wrap.appendChild(groupContainer);
     });
@@ -402,16 +522,17 @@
       const groupContainer = document.createElement("div");
       groupContainer.className = "item-group-buttons";
       
+      let groupVisible = 0;
       ungroupedItems.forEach(it => {
-        const b = document.createElement("button");
-        b.className = "btn";
-        b.textContent = `${it.name} ($${money(it.price)})`;
-        b.style.backgroundColor = it.color || "#6b7280";
-        b.style.borderColor = it.color || "#6b7280";
-        b.style.color = "#ffffff";
-        b.onclick = () => addToOrder(it.id);
-        groupContainer.appendChild(b);
+        const btn = createMenuBtn(it, false);
+        if (btn.style.display !== "none") groupVisible++;
+        groupContainer.appendChild(btn);
       });
+      
+      if (searchTerm && groupVisible === 0) {
+        groupHeader.classList.add("group-hidden");
+        groupContainer.classList.add("group-hidden");
+      }
       
       wrap.appendChild(groupContainer);
     }
@@ -426,18 +547,24 @@
       const specialsContainer = document.createElement("div");
       specialsContainer.className = "item-group-buttons";
       
+      let specialsVisible = 0;
       [...specials].sort((a, b) => (a.order || 0) - (b.order || 0)).forEach(special => {
-        const b = document.createElement("button");
-        b.className = "btn special-btn";
-        b.textContent = `${special.name} ($${money(special.price)})`;
-        b.style.backgroundColor = special.color || "#dc2626";
-        b.style.borderColor = special.color || "#dc2626";
-        b.style.color = "#ffffff";
-        b.onclick = () => addToOrder(special.id);
-        specialsContainer.appendChild(b);
+        const btn = createMenuBtn(special, true);
+        if (btn.style.display !== "none") specialsVisible++;
+        specialsContainer.appendChild(btn);
       });
       
+      if (searchTerm && specialsVisible === 0) {
+        specialsHeader.classList.add("group-hidden");
+        specialsContainer.classList.add("group-hidden");
+      }
+      
       wrap.appendChild(specialsContainer);
+    }
+    
+    // Show/hide no results message
+    if (noResults) {
+      noResults.style.display = (searchTerm && totalVisible === 0) ? "block" : "none";
     }
   }
 
@@ -817,6 +944,16 @@
       persist(); renderButtons();
     };
     
+    const emojiInput = document.createElement("input");
+    emojiInput.className = "item-input emoji-input";
+    emojiInput.value = it.emoji || "";
+    emojiInput.placeholder = "🍽️";
+    emojiInput.title = "Emoji icon";
+    emojiInput.oninput = () => {
+      it.emoji = emojiInput.value;
+      persist(); renderButtons();
+    };
+    
     const copyBtn = document.createElement("button");
     copyBtn.className = "btn small";
     copyBtn.textContent = "⎘";
@@ -828,6 +965,7 @@
         name: it.name + " (copy)",
         price: it.price,
         color: it.color,
+        emoji: it.emoji || "",
         groupId: it.groupId,
         order: maxOrder + 1
       };
@@ -847,6 +985,7 @@
     row.appendChild(handle);
     row.appendChild(nameInput);
     row.appendChild(priceInput);
+    row.appendChild(emojiInput);
     row.appendChild(colorInput);
     row.appendChild(copyBtn);
     row.appendChild(deleteBtn);
@@ -919,9 +1058,11 @@
       if (!it) continue;
 
       const tr = document.createElement("tr");
+      tr.className = "order-table-row";
 
       const itemTd = document.createElement("td");
-      itemTd.textContent = `${it.name} ($${money(it.price)})`;
+      const emojiPrefix = it.emoji ? `${it.emoji} ` : '';
+      itemTd.textContent = `${emojiPrefix}${it.name} ($${money(it.price)})`;
 
       const qtyTd = document.createElement("td");
       const minus10 = document.createElement("button");
@@ -993,7 +1134,8 @@
   }
 
   function renderReceipt() {
-    $("receiptOut").value = receiptText();
+    const isShorthand = $("shorthandReceipt") && $("shorthandReceipt").checked;
+    $("receiptOut").value = isShorthand ? shorthandReceiptText() : receiptText();
     renderComponentBreakdown();
   }
   
@@ -1062,6 +1204,7 @@
     renderOrder();
     renderReceipt();
     updateJsonTextbox();
+    updateLastOrderButton();
   }
 
   // Update JSON textbox with current menu
@@ -1079,6 +1222,7 @@
         name: item.name, 
         price: item.price, 
         color: item.color,
+        emoji: item.emoji || "",
         groupId: item.groupId || null
       })),
       title: $("receiptTitle").value || "Receipt",
@@ -1133,6 +1277,7 @@
           name: item.name || "Unnamed Item",
           price: Number(item.price) || 0,
           color: item.color || "#6b7280",
+          emoji: item.emoji || "",
           groupId: item.groupId || null,
           order: item.order ?? idx
         }));
@@ -1203,7 +1348,7 @@
     if (!name) return;
 
     const maxOrder = items.length > 0 ? Math.max(...items.map(i => i.order || 0)) : -1;
-    items.push({ id: crypto.randomUUID(), name, price, color, groupId, order: maxOrder + 1 });
+    items.push({ id: crypto.randomUUID(), name, price, color, emoji: "", groupId, order: maxOrder + 1 });
     $("newName").value = "";
     $("newPrice").value = "";
     $("newColor").value = "#6b7280";
@@ -1217,11 +1362,16 @@
   if ($("showBreakdownInReceipt")) {
     $("showBreakdownInReceipt").onchange = () => { renderReceipt(); };
   }
+  if ($("shorthandReceipt")) {
+    $("shorthandReceipt").onchange = () => { renderReceipt(); };
+  }
 
   $("clearOrderBtn").onclick = () => {
+    saveLastOrder();
     order = {};
     persist();
     render();
+    updateLastOrderButton();
   };
 
   $("resetDefaultBtn").onclick = () => {
@@ -1240,6 +1390,7 @@
         ...it, 
         id: crypto.randomUUID(),
         color: it.color || "#6b7280",
+        emoji: it.emoji || "",
         groupId: it.groupId || null,
         order: idx
       }));
@@ -1252,10 +1403,26 @@
     }
   };
 
+  // Helper: find template by name (case-insensitive)
+  function findTemplate(name) {
+    const key = Object.keys(menuTemplates).find(k => k.toLowerCase() === name.toLowerCase());
+    return key ? { key, template: menuTemplates[key] } : null;
+  }
+
   $("loadTemplateBtn").onclick = () => {
-    const selectedTemplate = $("templateSelect").value;
-    if (confirm(`Load ${selectedTemplate} template? This will replace your current menu items.`)) {
-      const template = menuTemplates[selectedTemplate];
+    // Typed name takes priority (allows loading hidden templates)
+    const typedName = ($("templateNameInput").value || "").trim();
+    const selectedTemplate = typedName || $("templateSelect").value;
+    const found = findTemplate(selectedTemplate);
+    
+    if (!found) {
+      alert(`Template "${selectedTemplate}" not found.`);
+      return;
+    }
+    
+    const { key: templateName, template } = found;
+    
+    if (confirm(`Load ${templateName} template? This will replace your current menu items.`)) {
       groups = template.groups ? [...template.groups] : [];
       specials = template.specials ? template.specials.map((s, idx) => ({
         ...s,
@@ -1268,6 +1435,7 @@
         ...it, 
         id: crypto.randomUUID(),
         color: it.color || "#6b7280",
+        emoji: it.emoji || "",
         groupId: it.groupId || null,
         order: idx
       }));
@@ -1275,9 +1443,18 @@
         $("receiptTitle").value = template.title;
       }
       order = {};
+      $("templateNameInput").value = "";
       persist();
       render();
       showStatus("Template loaded!");
+    }
+  };
+
+  // Allow Enter key in the text input to trigger load
+  $("templateNameInput").onkeypress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      $("loadTemplateBtn").click();
     }
   };
 
@@ -1318,6 +1495,7 @@
         name: item.name, 
         price: item.price, 
         color: item.color,
+        emoji: item.emoji || "",
         groupId: item.groupId || null
       })),
       title: $("receiptTitle").value || "Receipt",
@@ -1388,6 +1566,7 @@
             name: item.name || "Unnamed Item",
             price: Number(item.price) || 0,
             color: item.color || "#6b7280",
+            emoji: item.emoji || "",
             groupId: item.groupId || null,
             order: item.order ?? idx
           }));
@@ -1462,9 +1641,122 @@
   $("orderingTab").onclick = () => switchTab('ordering');
 
   // Set initial tab - load from localStorage or default to menu tab
-  const savedTab = localStorage.getItem('sop_current_tab') || 'menu';
+  const savedTab = localStorage.getItem('sop_current_tab') || 'ordering';
   switchTab(savedTab);
 
   // Initial render
   render();
+  updateLastOrderButton();
+
+  // === SEARCH BAR ===
+  const searchBar = $("searchBar");
+  const searchClear = $("searchClear");
+  const searchWrap = $("searchWrap");
+  
+  if (searchBar) {
+    searchBar.oninput = () => {
+      const hasValue = searchBar.value.trim().length > 0;
+      searchWrap.classList.toggle("has-value", hasValue);
+      renderButtons();
+    };
+  }
+  
+  if (searchClear) {
+    searchClear.onclick = () => {
+      searchBar.value = "";
+      searchWrap.classList.remove("has-value");
+      renderButtons();
+      searchBar.focus();
+    };
+  }
+
+  // === LAST ORDER RECALL ===
+  if ($("lastOrderBtn")) {
+    $("lastOrderBtn").onclick = () => {
+      const lastOrder = getLastOrder();
+      if (!lastOrder || Object.keys(lastOrder).length === 0) return;
+      
+      // Validate that item IDs still exist
+      const validOrder = {};
+      for (const [id, qty] of Object.entries(lastOrder)) {
+        if (getItem(id)) validOrder[id] = qty;
+      }
+      
+      if (Object.keys(validOrder).length === 0) {
+        return;
+      }
+      
+      order = { ...validOrder };
+      persist();
+      render();
+    };
+  }
+
+  // === KEYBOARD SHORTCUTS ===
+  document.addEventListener("keydown", (e) => {
+    const activeTag = document.activeElement?.tagName;
+    const isTyping = activeTag === "INPUT" || activeTag === "TEXTAREA" || activeTag === "SELECT";
+    
+    // Esc: clear search or clear order
+    if (e.key === "Escape") {
+      if (searchBar && searchBar.value.trim()) {
+        searchBar.value = "";
+        searchWrap.classList.remove("has-value");
+        renderButtons();
+        searchBar.blur();
+        return;
+      }
+      if (!isTyping && Object.keys(order).length > 0) {
+        saveLastOrder();
+        order = {};
+        persist();
+        render();
+        updateLastOrderButton();
+      }
+      return;
+    }
+    
+    // / : focus search (when not typing)
+    if (e.key === "/" && !isTyping) {
+      e.preventDefault();
+      if (searchBar) searchBar.focus();
+      return;
+    }
+    
+    // Ctrl+Shift+C: copy receipt
+    if (e.ctrlKey && e.shiftKey && e.key === "C") {
+      e.preventDefault();
+      const text = $("receiptOut").value;
+      navigator.clipboard.writeText(text).then(() => {
+        showStatus("Copied!", 900);
+      }).catch(() => {
+        showStatus("Copy failed", 0);
+      });
+      return;
+    }
+    
+    // Ctrl+Shift+L: repeat last order
+    if (e.ctrlKey && e.shiftKey && e.key === "L") {
+      e.preventDefault();
+      if ($("lastOrderBtn")) $("lastOrderBtn").click();
+      return;
+    }
+  });
+
+  // === SHORTCUTS POPUP ===
+  const shortcutsBtn = $("shortcutsBtn");
+  const shortcutsPopup = $("shortcutsPopup");
+  
+  if (shortcutsBtn && shortcutsPopup) {
+    shortcutsBtn.onclick = (e) => {
+      e.stopPropagation();
+      shortcutsPopup.classList.toggle("open");
+    };
+    
+    document.addEventListener("click", (e) => {
+      if (!shortcutsPopup.contains(e.target) && e.target !== shortcutsBtn) {
+        shortcutsPopup.classList.remove("open");
+      }
+    });
+  }
 })();

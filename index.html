@@ -10,7 +10,10 @@
   <div class="app-header">
     <h1>Order Pad</h1>
     <div class="header-controls">
-      <span class="pill" id="status">Saved locally</span>
+      <select id="templateSelect" class="template-select header-template-select"></select>
+      <input type="text" id="templateNameInput" class="template-name-input" placeholder="or type name..." autocomplete="off" />
+      <button class="btn small" id="loadTemplateBtn" title="Load selected template">Load</button>
+      <span class="header-divider"></span>
       <button class="btn tab-btn active" data-tab="ordering" id="orderingTab">Order</button>
       <button class="btn tab-btn" data-tab="menu" id="menuTab">Edit Menu</button>
     </div>
@@ -103,14 +106,6 @@
         </div>
 
         <div class="section">
-          <h3>Templates</h3>
-          <div class="control-group">
-            <select id="templateSelect" class="template-select"></select>
-            <button class="btn" id="loadTemplateBtn">Load template</button>
-          </div>
-        </div>
-
-        <div class="section">
           <h3>Menu JSON</h3>
           <div class="control-group">
             <textarea id="menuJsonText" rows="12" placeholder="Paste menu JSON here..." style="width: 100%; font-family: monospace; font-size: 12px; resize: vertical;"></textarea>
@@ -140,12 +135,22 @@
         <div class="panel-header">
           <h2>Place Order</h2>
           <div class="panel-actions">
+            <button class="btn last-order" id="lastOrderBtn" title="Repeat last order" style="display:none;">↩ Last order</button>
             <button class="btn danger" id="clearOrderBtn">Clear order</button>
           </div>
         </div>
 
         <div class="menu-items">
+          <div class="search-bar-wrap" id="searchWrap">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-bar" id="searchBar" placeholder="Search menu items..." autocomplete="off" />
+            <button class="search-clear" id="searchClear">&times;</button>
+          </div>
           <div id="itemButtons" class="item-buttons"></div>
+          <div id="noResults" class="no-results" style="display:none;">
+            <span class="no-results-icon">🔎</span>
+            No items match your search.
+          </div>
         </div>
 
         <div class="current-order">
@@ -155,12 +160,16 @@
       </div>
 
       <div class="panel receipt-panel">
-        <div class="panel-header">
+        <div class="panel-header sticky-total">
           <h2>Receipt</h2>
           <div class="panel-actions">
             <button class="btn primary" id="copyBtn">Copy receipt</button>
             <button class="btn" id="selectBtn">Select all</button>
           </div>
+        </div>
+        
+        <div class="total-display">
+          <span id="totalLine" class="total-amount"></span>
         </div>
         
         <div class="control-group" style="margin-bottom: 8px;">
@@ -175,8 +184,11 @@
           </label>
         </div>
         
-        <div class="total-display">
-          <span id="totalLine" class="total-amount"></span>
+        <div class="control-group" style="margin-bottom: 8px;">
+          <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; min-width: auto;">
+            <input type="checkbox" id="shorthandReceipt" style="width: auto; margin: 0;" />
+            <span style="font-size: 12px;">Shorthand (single line)</span>
+          </label>
         </div>
         
         <textarea id="receiptOut" spellcheck="false" class="receipt-output"></textarea>
@@ -186,6 +198,18 @@
         
         <div id="componentBreakdownWrap" style="margin-top: 12px;"></div>
       </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Help -->
+  <div class="shortcuts-help">
+    <button class="shortcuts-btn" id="shortcutsBtn" title="Keyboard shortcuts">?</button>
+    <div class="shortcuts-popup" id="shortcutsPopup">
+      <h4>⌨️ Keyboard Shortcuts</h4>
+      <div class="shortcut-row"><span>Clear order</span><span class="shortcut-key">Esc</span></div>
+      <div class="shortcut-row"><span>Focus search</span><span class="shortcut-key">/</span></div>
+      <div class="shortcut-row"><span>Copy receipt</span><span class="shortcut-key">Ctrl+Shift+C</span></div>
+      <div class="shortcut-row"><span>Repeat last order</span><span class="shortcut-key">Ctrl+Shift+L</span></div>
     </div>
   </div>
 
