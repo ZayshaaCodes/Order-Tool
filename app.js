@@ -207,7 +207,31 @@
         { name: "Electronic Parts", price: 1, color: "#16a34a", groupId: 1, emoji: "⚡" },
         { name: "Scrap Metal", price: 4, color: "#16a34a", groupId: 1, emoji: "🔩" }
       ]
-    }
+    },
+    "Noodle Exchange": {
+      title: "NE Reciept",
+      groups: [
+        { id: 1, order: 1, name: "Food" },
+        { id: 2, order: 2, name: "Drinks" }
+      ],
+      specials: [
+        { name: "California Quintuple", price: 500, color: "#dc2626", groupId: 1, subItems: ["X5 California Maki"] },
+        { name: "Sashimi Fivefold", price: 500, color: "#dc2626", groupId: 1, subItems: ["X5 Sashimi"] },
+        { name: "Gang Of Guksu", price: 450, color: "#dc2626", groupId: 1, subItems: ["X5 Guksu"] },
+        { name: "Battle Bod", price: 450, color: "#dc2626", groupId: 1, subItems: ["X2 California Maki", "X2 Sashimi"] }
+      ],
+      items: [
+        { name: "Guksu", price: 125, color: "#16a34a", groupId: 1, emoji: "🍛" },
+        { name: "Pad Thai", price: 100, color: "#16a34a", groupId: 1, emoji: "🍜" },
+        { name: "Cali Maki", price: 150, color: "#16a34a", groupId: 1, emoji: "🍣" },
+        { name: "Salad", price: 50, color: "#16a34a", groupId: 1, emoji: "🥗" },
+        { name: "Sashimi Roll", price: 150, color: "#16a34a", groupId: 1, emoji: "🍣" },
+        { name: "Tuna Roll", price: 100, color: "#16a34a", groupId: 1, emoji: "🌣" },
+        { name: "Chips", price: 50, color: "#16a34a", groupId: 1, emoji: "🍟" },
+        { name: "Japanese Pan Noodles", price: 75, color: "#16a34a", groupId: 1, emoji: "🍜" }
+      ]
+    },
+    
   };
 
   const defaultTemplate = menuTemplates["KOI"];
