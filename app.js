@@ -215,10 +215,10 @@
         { id: 2, order: 2, name: "Drinks" }
       ],
       specials: [
-        { name: "California Quintuple", price: 500, color: "#dc2626", groupId: 1, subItems: ["X5 California Maki"] },
-        { name: "Sashimi Fivefold", price: 500, color: "#dc2626", groupId: 1, subItems: ["X5 Sashimi"] },
+        { name: "California Quintuple", price: 500, color: "#dc2626", groupId: 1, subItems: ["X5 Cali Maki"] },
+        { name: "Sashimi Fivefold", price: 500, color: "#dc2626", groupId: 1, subItems: ["X5 Sashimi Roll"] },
         { name: "Gang Of Guksu", price: 450, color: "#dc2626", groupId: 1, subItems: ["X5 Guksu"] },
-        { name: "Battle Bod", price: 450, color: "#dc2626", groupId: 1, subItems: ["X2 California Maki", "X2 Sashimi"] }
+        { name: "Battle Bod", price: 450, color: "#dc2626", groupId: 1, subItems: ["X2 Cali Maki", "X2 Sashimi Roll"] }
       ],
       items: [
         { name: "Guksu", price: 125, color: "#16a34a", groupId: 1, emoji: "🍛" },
