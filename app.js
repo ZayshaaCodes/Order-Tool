@@ -1736,6 +1736,39 @@
   }
   updateTemplateBadge();
 
+  // === URL TEMPLATE AUTO-LOAD ===
+  (() => {
+    const params = new URLSearchParams(window.location.search);
+    const templateParam = params.get("template");
+    if (!templateParam) return;
+    const found = findTemplate(templateParam);
+    if (!found) return;
+    const { key: templateName, template } = found;
+    groups = template.groups ? [...template.groups] : [];
+    specials = template.specials ? template.specials.map((s, idx) => ({
+      ...s,
+      id: crypto.randomUUID(),
+      color: s.color || "#dc2626",
+      order: idx,
+      subItems: s.subItems || []
+    })) : [];
+    items = template.items.map((it, idx) => ({
+      ...it,
+      id: crypto.randomUUID(),
+      color: it.color || "#6b7280",
+      emoji: it.emoji || "",
+      groupId: it.groupId || null,
+      order: idx
+    }));
+    if (template.title) {
+      $("receiptTitle").value = template.title;
+    }
+    order = {};
+    persist();
+    render();
+    setLoadedTemplate(templateName);
+  })();
+
   // === LAST ORDER RECALL ===
   if ($("lastOrderBtn")) {
     $("lastOrderBtn").onclick = () => {
