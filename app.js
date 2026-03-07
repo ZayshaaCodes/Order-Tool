@@ -231,6 +231,25 @@
         { name: "Japanese Pan Noodles", price: 75, color: "#16a34a", groupId: 1, emoji: "🍜" }
       ]
     },
+    "Bobs Balls": {
+      title: "Bobs Balls Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Food" },
+        { id: 2, order: 2, name: "Drinks" }
+      ],
+      specials: [],
+      items: [
+        { name: "Fries", price: 50, color: "#16a34a", groupId: 1, emoji: "🍟" },
+        { name: "Hot Dog", price: 50, color: "#16a34a", groupId: 1, emoji: "🌭" },
+        { name: "Salad", price: 40, color: "#16a34a", groupId: 1, emoji: "🥗" },
+        { name: "Coke", price: 50, color: "#2563eb", groupId: 2, emoji: "🥤" },
+        { name: "Root Beer Float", price: 50, color: "#2563eb", groupId: 2, emoji: "🍺" },
+        { name: "Beer", price: 40, color: "#2563eb", groupId: 2, emoji: "🍻" },
+        { name: "Chocolate Shake", price: 40, color: "#2563eb", groupId: 2, emoji: "🥛" },
+        { name: "Explosive Shake", price: 40, color: "#2563eb", groupId: 2, emoji: "💥" },
+        { name: "Lemonade", price: 40, color: "#2563eb", groupId: 2, emoji: "🍋" }
+      ]
+    },
     
   };
 
