@@ -1764,6 +1764,10 @@
       $("receiptTitle").value = template.title;
     }
     order = {};
+    const select = $("templateSelect");
+    if (select && Array.from(select.options).some(o => o.value === templateName)) {
+      select.value = templateName;
+    }
     persist();
     render();
     setLoadedTemplate(templateName);
