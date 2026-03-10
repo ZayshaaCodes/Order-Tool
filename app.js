@@ -243,10 +243,10 @@
         { name: "Hot Dog", price: 50, color: "#16a34a", groupId: 1, emoji: "🌭" },
         { name: "Salad", price: 40, color: "#16a34a", groupId: 1, emoji: "🥗" },
         { name: "Coke", price: 50, color: "#2563eb", groupId: 2, emoji: "🥤" },
-        { name: "Root Beer Float", price: 50, color: "#2563eb", groupId: 2, emoji: "🍺" },
-        { name: "Beer", price: 40, color: "#2563eb", groupId: 2, emoji: "🍻" },
-        { name: "Chocolate Shake", price: 40, color: "#2563eb", groupId: 2, emoji: "🥛" },
-        { name: "Explosive Shake", price: 40, color: "#2563eb", groupId: 2, emoji: "💥" },
+        { name: "Root Beer Float", price: 80, color: "#2563eb", groupId: 2, emoji: "🍺" },
+        { name: "Beer", price: 60, color: "#2563eb", groupId: 2, emoji: "🍻" },
+        { name: "Chocolate Shake", price: 80, color: "#2563eb", groupId: 2, emoji: "🥛" },
+        { name: "Explosive Shake", price: 100, color: "#2563eb", groupId: 2, emoji: "💥" },
         { name: "Lemonade", price: 40, color: "#2563eb", groupId: 2, emoji: "🍋" }
       ]
     },
