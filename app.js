@@ -120,6 +120,7 @@
         { name: "Orange Smoothie", price: 50, color: "#2563eb", groupId: 2, emoji: "🍊" },    
       ]
     },    
+
     "Dreamworks": {
       title: "Dreamworks Receipt",
       groups: [
@@ -248,6 +249,32 @@
         { name: "Chocolate Shake", price: 80, color: "#2563eb", groupId: 2, emoji: "🥛" },
         { name: "Explosive Shake", price: 100, color: "#2563eb", groupId: 2, emoji: "💥" },
         { name: "Lemonade", price: 40, color: "#2563eb", groupId: 2, emoji: "🍋" }
+      ]
+    },
+    "BeanMachine": {
+      title: "BeanMachine Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Classic Coffee" },
+        { id: 2, order: 2, name: "Snacks" },
+        { id: 3, order: 3, name: "Non Coffee" }
+      ],
+      specials: [],
+      items: [
+        // Classic Coffee
+        { name: "Coffee", price: 40, color: "#16a34a", groupId: 1, emoji: "☕" },
+        { name: "Espresso", price: 45, color: "#16a34a", groupId: 1, emoji: "☕" },
+        { name: "Pumpkin Spice Latte", price: 55, color: "#16a34a", groupId: 1, emoji: "☕" },
+        { name: "White Chocolate Mocha", price: 55, color: "#16a34a", groupId: 1, emoji: "☕" },
+        // Snacks
+        { name: "Blueberry Muffin", price: 40, color: "#2563eb", groupId: 2, emoji: "🧁" },
+        { name: "Chocolate Muffin", price: 40, color: "#2563eb", groupId: 2, emoji: "🧁" },
+        { name: "Carrot Cake", price: 55, color: "#2563eb", groupId: 2, emoji: "🍰" },
+        { name: "Millionaire Shortbread", price: 60, color: "#2563eb", groupId: 2, emoji: "🍫" },
+        // Non Coffee
+        { name: "Coke", price: 25, color: "#8825ebff", groupId: 3, emoji: "🥤" },
+        { name: "Lemonade", price: 35, color: "#8825ebff", groupId: 3, emoji: "🍋" },
+        { name: "Orange Smoothie", price: 45, color: "#8825ebff", groupId: 3, emoji: "🍊" },
+        { name: "Veg Smoothie", price: 45, color: "#8825ebff", groupId: 3, emoji: "🥬" }
       ]
     },
     
