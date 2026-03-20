@@ -105,6 +105,8 @@
       ],
       specials: [
         { name: "Bacon Special", price: 400, color: "#dc2626", groupId: 1, subItems: ["5x Stack of Donuts", "5x Coke"] }
+        { name: "Mover Special", price: 380, color: "#dc2626", groupId: 1, subItems: ["10x Latte"] }
+        { name: "Weight Watcher Special", price: 400, color: "#dc2626", groupId: 1, subItems: ["10x Orange Smoothie"] }
       ],
       items: [
         { name: "Baguette", price: 40, color: "#16a34a", groupId: 1, emoji: "🥖" },         
@@ -118,30 +120,6 @@
         { name: "Latte", price: 45, color: "#2563eb", groupId: 2, emoji: "☕" },    
         { name: "Lemonade", price: 30, color: "#2563eb", groupId: 2, emoji: "🍋" },    
         { name: "Orange Smoothie", price: 50, color: "#2563eb", groupId: 2, emoji: "🍊" },    
-      ]
-    },    
-
-    "Dreamworks": {
-      title: "Dreamworks Receipt",
-      groups: [
-        { id: 1, order: 1, name: "Services" },
-        { id: 2, order: 2, name: "Tools" },
-        { id: 3, order: 3, name: "Employees" }
-      ],
-      specials: [
-        { name: "Full Service Package", price: 15000, color: "#dc2626", groupId: 1 }
-      ],
-      items: [
-        { name: "Body Repair", price: 75, color: "#16a34a", groupId: 1, emoji: "🔧" },         
-        { name: "Internals", price: 800, color: "#16a34a", groupId: 1, emoji: "⚙️" },     
-        { name: "HG Internals", price: 1200, color: "#16a34a", groupId: 1, emoji: "🔩" },    
-        { name: "Upgrade", price: 2500, color: "#16a34a", groupId: 1, emoji: "⬆️" },    
-        { name: "Turbo", price: 5000, color: "#16a34a", groupId: 1, emoji: "🚀" },  
-        { name: "Max Upgrade", price: 14000, color: "#16a34a", groupId: 1, emoji: "💎" },
-        { name: "Lockpick", price: 25, color: "#16a34a", groupId: 2, emoji: "🔑" },         
-        { name: "Repair Kit", price: 150, color: "#16a34a", groupId: 2, emoji: "🧰" }, 
-        { name: "Adv. Repair Kit", price: 450, color: "#16a34a", groupId: 2, emoji: "🛠️" }, 
-        { name: "Employee Max Upgrades", price: 10000, color: "#2563eb", groupId: 3, emoji: "👨‍🔧" },
       ]
     },
     "Clicklovers": {
