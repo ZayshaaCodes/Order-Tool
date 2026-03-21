@@ -104,8 +104,8 @@
         { id: 3, order: 3, name: "Deserts" }
       ],
       specials: [
-        { name: "Bacon Special", price: 400, color: "#dc2626", groupId: 1, subItems: ["5x Stack of Donuts", "5x Coke"] }
-        { name: "Mover Special", price: 380, color: "#dc2626", groupId: 1, subItems: ["10x Latte"] }
+        { name: "Bacon Special", price: 400, color: "#dc2626", groupId: 1, subItems: ["5x Stack of Donuts", "5x Coke"] },
+        { name: "Mover Special", price: 380, color: "#dc2626", groupId: 1, subItems: ["10x Latte"] },
         { name: "Weight Watcher Special", price: 400, color: "#dc2626", groupId: 1, subItems: ["10x Orange Smoothie"] }
       ],
       items: [
