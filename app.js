@@ -229,6 +229,36 @@
         { name: "Lemonade", price: 40, color: "#2563eb", groupId: 2, emoji: "🍋" }
       ]
     },
+    "Burger Shot": {
+      title: "Burger Shot Receipt",
+      groups: [
+        { id: 1, order: 1, name: "Burgers" },
+        { id: 2, order: 2, name: "Wraps & Sides" },
+        { id: 3, order: 3, name: "Drinks & Desserts" }
+      ],
+      specials: [
+        { name: "Classic Combo", price: 130, color: "#dc2626", groupId: 1, subItems: ["1x Simple Burger", "1x Fries", "1x Burger Shot Drink"] },
+        { name: "Heart Stopper Combo", price: 160, color: "#dc2626", groupId: 1, subItems: ["1x Heart Stopper", "1x Fries", "1x Burger Shot Drink"] },
+        { name: "Double Shot Combo", price: 170, color: "#dc2626", groupId: 1, subItems: ["1x Double Shot", "1x Fries", "1x Burger Shot Drink"] },
+        { name: "Chicken Combo", price: 150, color: "#dc2626", groupId: 1, subItems: ["1x The Prickly", "1x Fries", "1x Burger Shot Drink"] },
+        { name: "Wrap Combo", price: 140, color: "#dc2626", groupId: 2, subItems: ["1x Any Wrap", "1x Fries", "1x Burger Shot Drink"] }
+      ],
+      items: [
+        { name: "Simple Burger", price: 80, color: "#16a34a", groupId: 1, emoji: "🍔" },
+        { name: "Heart Stopper", price: 110, color: "#16a34a", groupId: 1, emoji: "🍔" },
+        { name: "Double Shot", price: 120, color: "#16a34a", groupId: 1, emoji: "🍔" },
+        { name: "The Bleeder", price: 130, color: "#16a34a", groupId: 1, emoji: "🍔" },
+        { name: "The Prickly", price: 110, color: "#16a34a", groupId: 1, emoji: "🍔" },
+        { name: "Chicken Wrap", price: 90, color: "#f59e0b", groupId: 2, emoji: "🌯" },
+        { name: "Goat Cheese Wrap", price: 95, color: "#f59e0b", groupId: 2, emoji: "🌯" },
+        { name: "Taco", price: 70, color: "#f59e0b", groupId: 2, emoji: "🌮" },
+        { name: "Fries", price: 50, color: "#f59e0b", groupId: 2, emoji: "🍟" },
+        { name: "Burger Shot Drink", price: 25, color: "#2563eb", groupId: 3, emoji: "🥤" },
+        { name: "Mocha Shake", price: 30, color: "#2563eb", groupId: 3, emoji: "🥤" },
+        { name: "Orangotang Ice Cream", price: 30, color: "#8825ebff", groupId: 3, emoji: "🍦" },
+        { name: "Meteorite Ice Cream", price: 35, color: "#8825ebff", groupId: 3, emoji: "🍦" }
+      ]
+    },
     "BeanMachine": {
       title: "BeanMachine Receipt",
       groups: [
@@ -296,7 +326,7 @@
   $("discountPct").value = discountPct;
   $("receiptTitle").value = title;
 
-  const hiddenTemplates = new Set(["Materials"]);
+  const hiddenTemplates = new Set(["Materials", "Burger Shot"]);
 
   populateTemplateDropdown();
 
