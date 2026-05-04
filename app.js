@@ -326,28 +326,6 @@
   $("discountPct").value = discountPct;
   $("receiptTitle").value = title;
 
-  const hiddenTemplates = new Set(["Materials", "Burger Shot"]);
-
-  populateTemplateDropdown();
-
-  function populateTemplateDropdown() {
-    const select = $("templateSelect");
-    select.innerHTML = "";
-    
-    Object.keys(menuTemplates).forEach(templateName => {
-      if (hiddenTemplates.has(templateName)) return;
-      const option = document.createElement("option");
-      option.value = templateName;
-      option.textContent = templateName;
-      select.appendChild(option);
-    });
-    
-    // Set default to first visible template
-    if (select.options.length > 0) {
-      select.value = select.options[0].value;
-    }
-  }
-
   function money(n) { 
     return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); 
   }
@@ -1472,9 +1450,16 @@
   };
 
   $("resetDefaultBtn").onclick = () => {
-    const selectedTemplate = $("templateSelect").value;
+    const selectedTemplate = localStorage.getItem("sop_loaded_template") || "KOI";
+    const found = findTemplate(selectedTemplate);
+
+    if (!found) {
+      alert("Load a menu before resetting to defaults.");
+      return;
+    }
+
     if (confirm(`Reset all items to ${selectedTemplate} template? This will remove custom items.`)) {
-      const template = menuTemplates[selectedTemplate];
+      const { key: templateName, template } = found;
       groups = template.groups ? [...template.groups] : [];
       specials = template.specials ? template.specials.map((s, idx) => ({
         ...s,
@@ -1497,7 +1482,7 @@
       order = {};
       persist();
       render();
-      setLoadedTemplate(selectedTemplate);
+      setLoadedTemplate(templateName);
     }
   };
 
@@ -1508,13 +1493,17 @@
   }
 
   $("loadTemplateBtn").onclick = () => {
-    // Typed name takes priority (allows loading hidden templates)
     const typedName = ($("templateNameInput").value || "").trim();
-    const selectedTemplate = typedName || $("templateSelect").value;
-    const found = findTemplate(selectedTemplate);
+
+    if (!typedName) {
+      alert("Type a template name to load a menu.");
+      return;
+    }
+
+    const found = findTemplate(typedName);
     
     if (!found) {
-      alert(`Template "${selectedTemplate}" not found.`);
+      alert(`Template "${typedName}" not found.`);
       return;
     }
     
@@ -1799,10 +1788,6 @@
       $("receiptTitle").value = template.title;
     }
     order = {};
-    const select = $("templateSelect");
-    if (select && Array.from(select.options).some(o => o.value === templateName)) {
-      select.value = templateName;
-    }
     persist();
     render();
     setLoadedTemplate(templateName);
