@@ -231,6 +231,7 @@
     },
     "Burger Shot": {
       title: "Burger Shot Receipt",
+      // stylePreset: "burger-shot",
       groups: [
         { id: 1, order: 1, name: "Burgers" },
         { id: 2, order: 2, name: "Wraps & Sides" },
@@ -257,6 +258,34 @@
         { name: "Mocha Shake", price: 30, color: "#2563eb", groupId: 3, emoji: "🥤" },
         { name: "Orangotang Ice Cream", price: 30, color: "#8825ebff", groupId: 3, emoji: "🍦" },
         { name: "Meteorite Ice Cream", price: 35, color: "#8825ebff", groupId: 3, emoji: "🍦" }
+      ]
+    },
+    "Cluckin Bell": {
+      title: "Cluckin' Bell Receipt",
+      // stylePreset: "cluckin-bell",
+      groups: [
+        { id: 1, order: 1, name: "Chicken" },
+        { id: 2, order: 2, name: "Sides" },
+        { id: 3, order: 3, name: "Smoothies" }
+      ],
+      specials: [
+        { name: "Family Meal", price: 300, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Bucket", "1x Cluckin Buffalo Wings", "1x Cluckin Wing Dings", "1x Cluckin Wedges", "4x Drink"] },
+        { name: "Cluckin Fillet Combo", price: 170, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Fillet", "1x Cluckin Wedges", "1x Drink"] },
+        { name: "Cluckin Double Fillet Combo", price: 180, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Double Fillet", "1x Cluckin Wedges", "1x Drink"] },
+        { name: "Cluckin Wrap Combo", price: 100, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Wrap", "1x Drink"] },
+        { name: "Cluckin Wings Combo", price: 110, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Buffalo Wings", "1x Cluckin Wing Dings"] }
+      ],
+      items: [
+        { name: "Cluckin Bucket", price: 125, color: "#c50814", groupId: 1, emoji: "🍗" },
+        { name: "Cluckin Buffalo Wings", price: 80, color: "#c50814", groupId: 1, emoji: "🍗" },
+        { name: "Cluckin Fillet", price: 100, color: "#c50814", groupId: 1, emoji: "🥪" },
+        { name: "Cluckin Double Fillet", price: 110, color: "#c50814", groupId: 1, emoji: "🍔" },
+        { name: "Cluckin Pie", price: 25, color: "#c50814", groupId: 1, emoji: "🥧" },
+        { name: "Cluckin Wedges", price: 50, color: "#f0a800", groupId: 2, emoji: "🥔" },
+        { name: "Cluckin Wing Dings", price: 80, color: "#f0a800", groupId: 2, emoji: "🍗" },
+        { name: "Cluckin Wrap", price: 80, color: "#f0a800", groupId: 2, emoji: "🌯" },
+        { name: "Cluckin Banana Smoothie", price: 25, color: "#1752b5", groupId: 3, emoji: "🍌" },
+        { name: "Cluckin Raspberry Smoothie", price: 25, color: "#1752b5", groupId: 3, emoji: "🥤" }
       ]
     },
     "BeanMachine": {
@@ -289,6 +318,12 @@
   };
 
   const defaultTemplate = menuTemplates["KOI"];
+  const stylePresets = {
+    default: { label: "Default" },
+    "burger-shot": { label: "Burger Shot" },
+    "cluckin-bell": { label: "Cluckin' Bell" }
+  };
+
   const defaultItems = defaultTemplate.items.map((item, index) => ({
     ...item,
     id: crypto.randomUUID(),
@@ -321,10 +356,50 @@
   let order = load("sop_order_v1", {}); // { itemId: qty }
   let discountPct = load("sop_discount_v1", 0);
   let title = load("sop_title_v1", "Receipt");
+  let currentStylePreset = load("sop_style_preset_v1", "default");
 
   // Initialize form values
   $("discountPct").value = discountPct;
   $("receiptTitle").value = title;
+
+  function normalizeStylePreset(preset) {
+    return stylePresets[preset] ? preset : "default";
+  }
+
+  function applyStylePreset(preset, shouldPersist = true) {
+    currentStylePreset = normalizeStylePreset(preset);
+    document.body.dataset.stylePreset = currentStylePreset;
+
+    const select = $("stylePresetSelect");
+    if (select) select.value = currentStylePreset;
+
+    if (shouldPersist) {
+      save("sop_style_preset_v1", currentStylePreset);
+    }
+  }
+
+  function getTemplateStylePreset(template) {
+    return template.stylePreset || "default";
+  }
+
+  function populateStylePresetSelect() {
+    const select = $("stylePresetSelect");
+    if (!select) return;
+
+    select.innerHTML = "";
+    Object.entries(stylePresets).forEach(([id, preset]) => {
+      const option = document.createElement("option");
+      option.value = id;
+      option.textContent = preset.label;
+      select.appendChild(option);
+    });
+
+    select.value = normalizeStylePreset(currentStylePreset);
+    select.onchange = () => applyStylePreset(select.value);
+  }
+
+  populateStylePresetSelect();
+  applyStylePreset(currentStylePreset, false);
 
   function money(n) { 
     return (Math.round((n + Number.EPSILON) * 100) / 100).toFixed(2); 
@@ -1300,6 +1375,7 @@
         groupId: item.groupId || null
       })),
       title: $("receiptTitle").value || "Receipt",
+      stylePreset: currentStylePreset,
       version: "3.0"
     };
     $("menuJsonText").value = JSON.stringify(menuData, null, 2);
@@ -1359,6 +1435,8 @@
         if (menuData.title) {
           $("receiptTitle").value = menuData.title;
         }
+
+        applyStylePreset(menuData.stylePreset || "default");
         
         order = {};
         persist();
@@ -1479,6 +1557,7 @@
       if (template.title) {
         $("receiptTitle").value = template.title;
       }
+      applyStylePreset(getTemplateStylePreset(template));
       order = {};
       persist();
       render();
@@ -1488,7 +1567,9 @@
 
   // Helper: find template by name (case-insensitive)
   function findTemplate(name) {
-    const key = Object.keys(menuTemplates).find(k => k.toLowerCase() === name.toLowerCase());
+    const normalizeTemplateName = (value) => value.toLowerCase().replace(/[']/g, "").replace(/\s+/g, " ").trim();
+    const normalizedName = normalizeTemplateName(name);
+    const key = Object.keys(menuTemplates).find(k => normalizeTemplateName(k) === normalizedName);
     return key ? { key, template: menuTemplates[key] } : null;
   }
 
@@ -1529,6 +1610,7 @@
       if (template.title) {
         $("receiptTitle").value = template.title;
       }
+      applyStylePreset(getTemplateStylePreset(template));
       order = {};
       $("templateNameInput").value = "";
       persist();
@@ -1587,6 +1669,7 @@
         groupId: item.groupId || null
       })),
       title: $("receiptTitle").value || "Receipt",
+      stylePreset: currentStylePreset,
       exportDate: new Date().toISOString(),
       version: "3.0"
     };
@@ -1662,6 +1745,8 @@
           if (menuData.title) {
             $("receiptTitle").value = menuData.title;
           }
+
+          applyStylePreset(menuData.stylePreset || "default");
           
           order = {};
           persist();
@@ -1787,6 +1872,7 @@
     if (template.title) {
       $("receiptTitle").value = template.title;
     }
+    applyStylePreset(getTemplateStylePreset(template));
     order = {};
     persist();
     render();
