@@ -269,23 +269,23 @@
         { id: 3, order: 3, name: "Smoothies" }
       ],
       specials: [
-        { name: "Family Meal", price: 300, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Bucket", "1x Cluckin Buffalo Wings", "1x Cluckin Wing Dings", "1x Cluckin Wedges", "4x Drink"] },
-        { name: "Cluckin Fillet Combo", price: 170, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Fillet", "1x Cluckin Wedges", "1x Drink"] },
-        { name: "Cluckin Double Fillet Combo", price: 180, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Double Fillet", "1x Cluckin Wedges", "1x Drink"] },
-        { name: "Cluckin Wrap Combo", price: 100, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Wrap", "1x Drink"] },
-        { name: "Cluckin Wings Combo", price: 110, color: "#c50814", groupId: 1, subItems: ["1x Cluckin Buffalo Wings", "1x Cluckin Wing Dings"] }
+        { name: "Family Meal", price: 300, color: "#c50814", groupId: 1, subItems: ["1x Bucket", "1x Buffalo Wings", "1x Wing Dings", "1x Wedges", "4x Drink"] },
+        { name: "Fillet Combo", price: 170, color: "#c50814", groupId: 1, subItems: ["1x Fillet", "1x Wedges", "1x Drink"] },
+        { name: "Double Fillet Combo", price: 180, color: "#c50814", groupId: 1, subItems: ["1x Double Fillet", "1x Wedges", "1x Drink"] },
+        { name: "Wrap Combo", price: 100, color: "#c50814", groupId: 1, subItems: ["1x Wrap", "1x Drink"] },
+        { name: "Wings Combo", price: 110, color: "#c50814", groupId: 1, subItems: ["1x Buffalo Wings", "1x Wing Dings"] }
       ],
       items: [
-        { name: "Cluckin Bucket", price: 125, color: "#c50814", groupId: 1, emoji: "🍗" },
-        { name: "Cluckin Buffalo Wings", price: 80, color: "#c50814", groupId: 1, emoji: "🍗" },
-        { name: "Cluckin Fillet", price: 100, color: "#c50814", groupId: 1, emoji: "🥪" },
-        { name: "Cluckin Double Fillet", price: 110, color: "#c50814", groupId: 1, emoji: "🍔" },
-        { name: "Cluckin Pie", price: 25, color: "#c50814", groupId: 1, emoji: "🥧" },
-        { name: "Cluckin Wedges", price: 50, color: "#f0a800", groupId: 2, emoji: "🥔" },
-        { name: "Cluckin Wing Dings", price: 80, color: "#f0a800", groupId: 2, emoji: "🍗" },
-        { name: "Cluckin Wrap", price: 80, color: "#f0a800", groupId: 2, emoji: "🌯" },
-        { name: "Cluckin Banana Smoothie", price: 25, color: "#1752b5", groupId: 3, emoji: "🍌" },
-        { name: "Cluckin Raspberry Smoothie", price: 25, color: "#1752b5", groupId: 3, emoji: "🥤" }
+        { name: "Bucket", price: 125, color: "#c50814", groupId: 1, emoji: "🍗" },
+        { name: "Buffalo Wings", price: 80, color: "#c50814", groupId: 1, emoji: "🍗" },
+        { name: "Fillet", price: 100, color: "#c50814", groupId: 1, emoji: "🥪" },
+        { name: "Double Fillet", price: 110, color: "#c50814", groupId: 1, emoji: "🍔" },
+        { name: "Pie", price: 25, color: "#c50814", groupId: 1, emoji: "🥧" },
+        { name: "Wedges", price: 50, color: "#f0a800", groupId: 2, emoji: "🥔" },
+        { name: "Wing Dings", price: 80, color: "#f0a800", groupId: 2, emoji: "🍗" },
+        { name: "Wrap", price: 80, color: "#f0a800", groupId: 2, emoji: "🌯" },
+        { name: "Banana Smoothie", price: 25, color: "#1752b5", groupId: 3, emoji: "🍌" },
+        { name: "Raspberry Smoothie", price: 25, color: "#1752b5", groupId: 3, emoji: "🥤" }
       ]
     },
     "BeanMachine": {
@@ -314,7 +314,33 @@
         { name: "Veg Smoothie", price: 45, color: "#8825ebff", groupId: 3, emoji: "🥬" }
       ]
     },
-    
+    "Caseys": {
+      title: "Casey's Diner Receipt",
+      // stylePreset: "burger-shot",
+      groups: [
+        { id: 1, order: 1, name: "Food" },
+        { id: 3, order: 2, name: "Drinks" }
+      ],
+      specials: [
+        { name: "Cop Special", price: 150, color: "#dc2626", groupId: null, subItems: ["1x Donut 1x Espresso"] },
+        { name: "Breakfast Special", price: 350, color: "#dc2626", groupId: null, subItems: ["1x Hash Brown 1x Plate of Bacon 1x Espresso"] },
+        { name: "Wake Up Special", price: 375, color: "#dc2626", groupId: null, subItems: ["5x Espresso"] },
+        { name: "Adrenaline Junkie", price: 280, color: "#dc2626", groupId: null, subItems: ["5x BedBull Energys"] }
+      ],
+      items: [
+        { name: "Pancakes", price: 300, color: "#6b7280", groupId: 1, emoji: "" },
+        { name: "Hash Browns", price: 200, color: "#6b7280", groupId: 1, emoji: "" },
+        { name: "Omelette", price: 200, color: "#6b7280", groupId: 1, emoji: "" },
+        { name: "Plate of Bacon", price: 200, color: "#6b7280", groupId: 1, emoji: "" },
+        { name: "French Toast", price: 150, color: "#6b7280", groupId: 1, emoji: "" },
+        { name: "Lasagna", price: 200, color: "#6b7280", groupId: 1, emoji: "" },
+        { name: "Espresso", price: 100, color: "#6b7280", groupId: 3, emoji: "" },
+        { name: "BedBull Energy", price: 75, color: "#6b7280", groupId: 3, emoji: "" },
+        { name: "Cranberry Juice", price: 50, color: "#6b7280", groupId: 3, emoji: "" },
+        { name: "Strawberry Milkshake", price: 100, color: "#6b7280", groupId: 3, emoji: "" }
+      ]
+    },
+
   };
 
   const defaultTemplate = menuTemplates["KOI"];
@@ -557,6 +583,13 @@
     const discPct = Number($("discountPct").value || 0);
     const totalStr = discPct > 0 ? `Total: $${money(total)} (was $${money(subtotal)})` : `Total: $${money(total)}`;
     return parts.join(", ") + " | " + totalStr;
+  }
+
+  function refreshOrderViews() {
+    renderButtons();
+    renderOrder();
+    renderReceipt();
+    updateJsonTextbox();
   }
 
   function renderButtons() {
@@ -827,21 +860,27 @@
       const handle = createElement('div', 'drag-handle', { html: '⋮⋮' });
       
       const nameInput = createInput('text', 'item-input', special.name, {
-        oninput: () => { special.name = nameInput.value; persist(); }
+        oninput: () => {
+          special.name = nameInput.value;
+          persist();
+          refreshOrderViews();
+        }
       });
       
       const priceInput = createInput('number', 'item-input price-input', special.price, {
         step: '0.01',
         oninput: () => {
           special.price = Number(priceInput.value || 0);
-          persist(); renderButtons(); renderReceipt();
+          persist();
+          refreshOrderViews();
         }
       });
       
       const colorInput = createInput('color', 'color-picker', special.color || '#dc2626', {
         onchange: () => {
           special.color = colorInput.value;
-          persist(); renderButtons();
+          persist();
+          refreshOrderViews();
         }
       });
       
@@ -882,7 +921,8 @@
         placeholder: 'e.g., 2x Guku, 1x Tea, Salad',
         oninput: () => {
           special.subItems = subItemsInput.value.split(',').map(s => s.trim()).filter(s => s);
-          persist(); renderReceipt();
+          persist();
+          refreshOrderViews();
         }
       });
       
@@ -1072,7 +1112,11 @@
     const nameInput = document.createElement("input");
     nameInput.className = "item-input";
     nameInput.value = it.name;
-    nameInput.oninput = () => { it.name = nameInput.value; persist(); };
+    nameInput.oninput = () => {
+      it.name = nameInput.value;
+      persist();
+      refreshOrderViews();
+    };
     
     const priceInput = document.createElement("input");
     priceInput.className = "item-input price-input";
@@ -1081,7 +1125,8 @@
     priceInput.value = it.price;
     priceInput.oninput = () => {
       it.price = Number(priceInput.value || 0);
-      persist(); renderButtons(); renderReceipt();
+      persist();
+      refreshOrderViews();
     };
     
     const colorInput = document.createElement("input");
@@ -1090,7 +1135,8 @@
     colorInput.value = it.color || "#6b7280";
     colorInput.onchange = () => {
       it.color = colorInput.value;
-      persist(); renderButtons();
+      persist();
+      refreshOrderViews();
     };
     
     const emojiInput = document.createElement("input");
@@ -1100,7 +1146,8 @@
     emojiInput.title = "Emoji icon";
     emojiInput.oninput = () => {
       it.emoji = emojiInput.value;
-      persist(); renderButtons();
+      persist();
+      refreshOrderViews();
     };
     
     const copyBtn = document.createElement("button");
@@ -1808,6 +1855,10 @@
     
     // Save current tab preference
     localStorage.setItem('sop_current_tab', tabName);
+
+    if (tabName === 'ordering') {
+      refreshOrderViews();
+    }
   }
 
   // Initialize tab switching
