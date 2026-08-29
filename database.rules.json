@@ -1,0 +1,52 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "admin": {
+      "passcode": {
+        ".read": true,
+        ".write": "!data.exists()",
+        ".validate": "newData.hasChildren(['hash', 'salt']) && newData.child('hash').isString() && newData.child('salt').isString()"
+      }
+    },
+
+    "inviteCodes": {
+      ".read": true,
+      "$code": {
+        ".write": "!data.exists() || (!data.child('usedBy').exists() && newData.child('usedBy').isString())",
+        ".validate": "$code.matches(/^[A-Z2-9]{8}$/) && newData.child('created').isNumber()"
+      }
+    },
+
+    "shops": {
+      "$slug": {
+        ".read": true,
+
+        "name": {
+          ".write": "!data.exists()",
+          ".validate": "$slug.matches(/^[a-z0-9_-]{2,48}$/) && newData.isString() && newData.val().length >= 2 && newData.val().length <= 48 && root.child('inviteCodes').child(newData.parent().child('inviteCode').val()).child('usedBy').val() == $slug"
+        },
+        "created": {
+          ".write": "!data.exists()",
+          ".validate": "newData.isNumber()"
+        },
+        "inviteCode": {
+          ".write": "!data.exists()",
+          ".validate": "newData.isString()"
+        },
+        "lastSeen": {
+          ".write": true,
+          ".validate": "newData.isNumber()"
+        },
+        "passcode": {
+          ".write": true,
+          ".validate": "newData.hasChildren(['hash', 'salt']) && newData.child('hash').isString() && newData.child('salt').isString()"
+        },
+        "menu": {
+          ".write": "data.parent().child('name').exists() || newData.parent().child('name').exists()"
+        }
+      }
+    }
+  }
+}

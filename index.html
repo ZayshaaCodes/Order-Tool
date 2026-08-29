@@ -3,18 +3,88 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <meta name="description" content="Order Pad - build orders and share receipts" />
   <title>Order Pad</title>
+  <link rel="icon" href="data:," />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src https://orderpaddb-default-rtdb.firebaseio.com ws: wss:; img-src 'self' data:; font-src 'self';" />
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="css/shell.css">
 </head>
 <body>
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading...</div>
+  </div>
+
+  <!-- Shop picker (shown when no ?shop= param) -->
+  <div id="shopPicker" class="shop-picker" style="display:none;">
+    <div class="shop-picker-card">
+      <h1 class="shop-picker-title">Order Pad</h1>
+      <p class="shop-picker-sub">Open your shop's order pad</p>
+
+      <button class="btn primary" id="lastShopBtn" style="display:none;width:100%;margin-bottom:10px;"></button>
+
+      <div class="shop-create-row">
+        <input id="openShopName" type="text" placeholder="Shop name..." maxlength="48" />
+        <button class="btn primary" id="openShopBtn">Open</button>
+      </div>
+      <p id="openShopError" class="shop-error"></p>
+
+      <div class="shop-picker-divider"></div>
+
+      <p class="shop-picker-sub">Create a new shop (invite code required)</p>
+      <div class="shop-create-row">
+        <input id="newShopName" type="text" placeholder="New shop name..." maxlength="48" />
+        <input id="shopInviteCode" type="text" placeholder="Invite code" maxlength="8" style="width:110px;text-transform:uppercase;" />
+      </div>
+      <div class="shop-create-row">
+        <select id="starterTemplateSelect" title="Starter menu"></select>
+        <button class="btn primary" id="createShopBtn">Create</button>
+      </div>
+      <p id="shopCreateError" class="shop-error"></p>
+
+      <div class="shop-picker-divider"></div>
+
+      <div class="admin-section">
+        <button class="btn small" id="adminToggleBtn">🔑 Admin</button>
+        <a class="local-mode-link" href="?local=1">Use without a shop (local only) →</a>
+        <div id="adminPanel" style="display:none;">
+          <div id="adminLoginArea">
+            <div class="shop-create-row" style="margin-top:8px;">
+              <input id="adminPasscode" type="password" placeholder="Admin passcode" />
+              <button class="btn small primary" id="adminLoginBtn">Login</button>
+            </div>
+            <p id="adminError" class="shop-error"></p>
+          </div>
+          <div id="adminControls" style="display:none;">
+            <button class="btn primary" id="generateCodeBtn" style="width:100%;margin:8px 0;">Generate Invite Code</button>
+            <div id="generatedCodeDisplay" style="display:none;" class="invite-code-box">
+              <span id="generatedCodeText" class="invite-code-text"></span>
+              <p class="muted" style="font-size:12px;margin:4px 0 0;">One-time use - share it with the shop owner.</p>
+            </div>
+            <div id="inviteCodeList" class="invite-code-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App (hidden until a shop is selected or local mode) -->
+  <div id="appRoot">
   <div class="app-header">
-    <h1>Order Pad</h1>
+    <h1 id="shopTitle">Order Pad</h1>
     <div class="header-controls">
-      <input type="text" id="templateNameInput" class="template-name-input" placeholder="Menu name..." autocomplete="off" />
-      <button class="btn small" id="loadTemplateBtn" title="Load menu">Load</button>
+      <input type="text" id="templateNameInput" class="template-name-input owner-only" placeholder="Menu name..." autocomplete="off" />
+      <button class="btn small owner-only" id="loadTemplateBtn" title="Load menu">Load</button>
       <span class="header-divider"></span>
       <button class="btn tab-btn active" data-tab="ordering" id="orderingTab">Order</button>
-      <button class="btn tab-btn" data-tab="menu" id="menuTab">Edit Menu</button>
+      <button class="btn tab-btn owner-only" data-tab="menu" id="menuTab">Edit Menu</button>
+      <span class="header-divider shop-only"></span>
+      <button class="btn small shop-only" id="lockToggle">🔒 Locked</button>
+      <span id="syncDot" class="sync-dot shop-only" title="Loading..."></span>
+      <span id="appVersion" class="app-version"></span>
     </div>
   </div>
 
@@ -29,7 +99,7 @@
             <button class="btn danger" id="resetDefaultBtn">Reset to defaults</button>
           </div>
         </div>
-        
+
         <div class="add-item-section">
           <h3 class="collapsible-header" id="groupsHeader">
             <span class="collapse-icon">▶</span> Groups
@@ -112,6 +182,16 @@
           </div>
         </div>
 
+        <div class="section shop-only">
+          <h3>Shop</h3>
+          <div class="control-group">
+            <button class="btn" id="changePasscodeBtn">Change owner passcode</button>
+          </div>
+          <div class="muted">
+            💡 Menu changes sync live to everyone with this shop's link.
+          </div>
+        </div>
+
         <div class="section">
           <h3>Menu JSON</h3>
           <div class="control-group">
@@ -123,12 +203,6 @@
           </div>
           <div class="muted">
             💡 Menu changes update the JSON above automatically. Click "Load from JSON" to apply changes from the textbox.
-          </div>
-        </div>
-
-        <div class="help-text">
-          <div class="muted">
-            💡 Tip: All changes are automatically saved to your browser.
           </div>
         </div>
       </div>
@@ -184,16 +258,16 @@
             <button class="btn" id="selectBtn">Select all</button>
           </div>
         </div>
-        
+
         <div class="total-display">
           <span id="totalLine" class="total-amount"></span>
         </div>
-        
+
         <div class="control-group" style="margin-bottom: 8px;">
           <label>Discount %</label>
           <input type="number" id="discountPct" min="0" step="0.01" value="0" style="width: 80px;" />
         </div>
-        
+
         <div class="control-group" style="margin-bottom: 8px;">
           <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; min-width: auto;">
             <input type="checkbox" id="showBreakdownInReceipt" style="width: auto; margin: 0;" />
@@ -204,14 +278,23 @@
             <span style="font-size: 12px;">Shorthand</span>
           </label>
         </div>
-        
+
         <textarea id="receiptOut" spellcheck="false" class="receipt-output"></textarea>
-        
+
         <div id="componentBreakdownWrap" style="margin-top: 12px;"></div>
       </div>
     </div>
   </div>
+  </div><!-- /appRoot -->
 
-  <script src="app.js"></script>
+  <!-- Modal overlay -->
+  <div id="modalOverlay" class="modal-overlay" style="display:none;">
+    <div id="modalContent" class="modal-content"></div>
+  </div>
+
+  <!-- Status toast -->
+  <div id="statusToast" class="status-toast"></div>
+
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

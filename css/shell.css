@@ -1,0 +1,287 @@
+/* === APP SHELL: picker, modals, lock state, sync, toast ===
+   Complements styles.css (which owns the order pad itself). */
+
+/* --- Loading overlay --- */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg, #1a1a1a);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  z-index: 200;
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border, #444);
+  border-top-color: var(--primary, #2563eb);
+  border-radius: 50%;
+  animation: shell-spin 0.8s linear infinite;
+}
+
+@keyframes shell-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: var(--muted, #888);
+  font-size: 14px;
+}
+
+/* --- Shop picker --- */
+.shop-picker {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+}
+
+.shop-picker-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--panel-gradient, #2d2d2d);
+  border: 1px solid var(--border, #444);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 8px 30px var(--shadow, rgba(0, 0, 0, 0.3));
+}
+
+.shop-picker-title {
+  margin: 0 0 4px;
+  font-size: 24px;
+  color: var(--text-strong, #fff);
+  text-align: center;
+}
+
+.shop-picker-sub {
+  margin: 0 0 12px;
+  color: var(--muted, #888);
+  font-size: 13px;
+  text-align: center;
+}
+
+.shop-picker-divider {
+  height: 1px;
+  background: var(--border-quiet, #333);
+  margin: 18px 0;
+}
+
+.shop-create-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.shop-create-row input,
+.shop-create-row select {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-sunken, #1a1a1a);
+  border: 1px solid var(--border, #444);
+  border-radius: 6px;
+  color: var(--text, #e0e0e0);
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.shop-error {
+  color: var(--danger-soft, #fca5a5);
+  font-size: 13px;
+  min-height: 16px;
+  margin: 2px 0 0;
+}
+
+.admin-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.local-mode-link {
+  color: var(--muted, #888);
+  font-size: 12px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.local-mode-link:hover {
+  color: var(--text, #e0e0e0);
+  text-decoration: underline;
+}
+
+/* --- Invite codes (admin) --- */
+.invite-code-box {
+  background: var(--surface-sunken, #1a1a1a);
+  border: 1px dashed var(--primary, #2563eb);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.invite-code-text {
+  font-family: monospace;
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: var(--primary-soft, #93c5fd);
+  user-select: all;
+}
+
+.invite-code-list {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.invite-code-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: var(--surface-sunken, #1a1a1a);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.invite-code-row .code {
+  font-family: monospace;
+  letter-spacing: 1px;
+  color: var(--text-strong, #fff);
+}
+
+.invite-code-row.used .code {
+  text-decoration: line-through;
+  color: var(--muted, #888);
+}
+
+.invite-code-row .code-status {
+  color: var(--muted, #888);
+  font-size: 12px;
+}
+
+/* --- Modal --- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 150;
+  padding: 16px;
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 360px;
+  background: var(--surface, #2d2d2d);
+  border: 1px solid var(--border, #444);
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 10px 40px var(--shadow, rgba(0, 0, 0, 0.3));
+}
+
+.modal-content h3 {
+  margin: 0 0 10px;
+  color: var(--text-strong, #fff);
+}
+
+.modal-content input {
+  background: var(--surface-sunken, #1a1a1a);
+  border: 1px solid var(--border, #444);
+  border-radius: 6px;
+  color: var(--text, #e0e0e0);
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.modal-text {
+  color: var(--muted, #888);
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.modal-error {
+  color: var(--danger-soft, #fca5a5);
+  font-size: 13px;
+  min-height: 16px;
+  margin-bottom: 8px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.mb-8 { margin-bottom: 8px; }
+
+/* --- Header additions --- */
+.sync-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--muted, #888);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.sync-dot.connected {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.7);
+}
+
+.app-version {
+  color: var(--muted, #888);
+  font-size: 11px;
+}
+
+.btn.success {
+  background-color: #16a34a;
+  border-color: #16a34a;
+  color: #fff;
+}
+
+/* --- Access gating --- */
+/* Shop mode + not unlocked: hide everything owner-only */
+body.locked .owner-only {
+  display: none !important;
+}
+
+/* Local mode: no lock/sync concepts */
+body.local-mode .shop-only {
+  display: none !important;
+}
+
+/* --- Status toast (replaces the old missing #status element) --- */
+.status-toast {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: var(--surface-raised, #3a3a3a);
+  color: var(--text-strong, #fff);
+  border: 1px solid var(--border, #444);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 180;
+}
+
+.status-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
